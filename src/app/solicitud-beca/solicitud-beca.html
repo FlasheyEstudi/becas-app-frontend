@@ -1,0 +1,120 @@
+<div class="solicitud-beca-contenedor">
+  <h2 class="titulo-principal">Solicitudes de Beca</h2>
+
+  <!-- Mensaje de error si existe -->
+  <div *ngIf="error" class="alerta">{{ error }}</div>
+
+  <!-- Indicador de carga -->
+  <div *ngIf="loading" class="loading">Cargando...</div>
+
+  <!-- Buscador -->
+  <div class="search-container">
+    <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()"
+      placeholder="Buscar por observaciones, estudiante, tipo de beca..." class="search-input" />
+  </div>
+
+  <!-- Formulario para añadir solicitud de beca -->
+  <div class="form-container">
+    <h3 class="subtitulo">Añadir Nueva Solicitud de Beca</h3>
+    <form (ngSubmit)="onSubmitNewSolicitud()" #solicitudForm="ngForm">
+      <div class="form-group">
+        <label for="estudianteId">ID Estudiante:</label>
+        <input type="number" id="estudianteId" name="estudianteId" [(ngModel)]="newSolicitud.estudianteId"
+          placeholder="ID del estudiante" required min="1" />
+      </div>
+
+      <div class="form-group">
+        <label for="tipoBecaId">ID Tipo de Beca:</label>
+        <input type="number" id="tipoBecaId" name="tipoBecaId" [(ngModel)]="newSolicitud.tipoBecaId"
+          placeholder="ID del tipo de beca" required min="1" />
+      </div>
+
+      <div class="form-group">
+        <label for="estadoId">ID Estado:</label>
+        <input type="number" id="estadoId" name="estadoId" [(ngModel)]="newSolicitud.estadoId"
+          placeholder="ID del estado" required min="1" />
+      </div>
+
+      <div class="form-group">
+        <label for="fechaSolicitud">Fecha de Solicitud:</label>
+        <input type="date" id="fechaSolicitud" name="fechaSolicitud" [(ngModel)]="newSolicitud.fechaSolicitud"
+          required />
+      </div>
+
+      <div class="form-group">
+        <label for="periodoAcademicoId">ID Período Académico:</label>
+        <input type="number" id="periodoAcademicoId" name="periodoAcademicoId"
+          [(ngModel)]="newSolicitud.periodoAcademicoId" placeholder="ID del período académico" required min="1" />
+      </div>
+
+      <div class="form-group">
+        <label for="observaciones">Observaciones:</label>
+        <textarea id="observaciones" name="observaciones" [(ngModel)]="newSolicitud.observaciones"
+          placeholder="Observaciones de la solicitud" class="form-textarea"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="fechaResultado">Fecha de Resultado:</label>
+        <input type="date" id="fechaResultado" name="fechaResultado" [(ngModel)]="newSolicitud.fechaResultado" />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="loading" class="btn-primario">
+          Añadir Solicitud
+        </button>
+        <button type="button" (click)="onCancel()" class="btn-secundario">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Botón para recargar -->
+  <button class="btn btn-primario mb-3" (click)="cargarSolicitudes()" [disabled]="loading">
+    Recargar Lista
+  </button>
+
+  <!-- Tabla de solicitudes de beca -->
+  <table class="tabla" *ngIf="!loading && filteredSolicitudes.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Estudiante</th>
+        <th>Tipo Beca</th>
+        <th>Estado</th>
+        <th>Fecha Solicitud</th>
+        <th>Período</th>
+        <th>Observaciones</th>
+        <th>Fecha Resultado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let solicitud of filteredSolicitudes">
+        <td>{{ solicitud.id }}</td>
+        <td>{{ (solicitud.estudiante?.nombre + ' ' + solicitud.estudiante?.apellido) || 'N/A' }}</td>
+        <td>{{ solicitud.tipoBeca?.nombre || 'N/A' }}</td>
+        <td>{{ solicitud.estado?.nombre || 'N/A' }}</td>
+        <td>{{ solicitud.fechaSolicitud | date:'dd/MM/yyyy' }}</td>
+        <td>{{ solicitud.periodoAcademico?.nombre || 'N/A' }}</td>
+        <td>{{ solicitud.observaciones || 'N/A' }}</td>
+        <td>{{ solicitud.fechaResultado ? (solicitud.fechaResultado | date:'dd/MM/yyyy') : 'N/A' }}</td>
+        <td>
+          <button (click)="deleteSolicitud(solicitud.id)" class="btn-danger btn-sm">
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Mensaje si no hay solicitudes -->
+  <p *ngIf="filteredSolicitudes.length === 0 && !loading && !error" class="texto-centro">
+    No hay solicitudes de beca que coincidan con la búsqueda.
+  </p>
+
+  <!-- Mensaje si no hay solicitudes en la base de datos -->
+  <p *ngIf="solicitudes.length === 0 && !loading && !error" class="texto-centro">
+    No hay solicitudes de beca registradas en el sistema.
+  </p>
+</div>

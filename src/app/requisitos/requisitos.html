@@ -1,0 +1,98 @@
+<div class="requisitos-contenedor">
+  <h2 class="titulo-principal">Lista de Requisitos</h2>
+
+  <!-- Mensaje de error si existe -->
+  <div *ngIf="error" class="alerta">{{ error }}</div>
+
+  <!-- Indicador de carga -->
+  <div *ngIf="loading" class="loading">
+    Cargando...
+  </div>
+
+  <!-- Buscador -->
+  <div class="search-container">
+    <input 
+      type="text" 
+      [(ngModel)]="searchTerm" 
+      (input)="onSearch()" 
+      placeholder="Buscar por descripción..." 
+      class="search-input" />
+  </div>
+
+  <!-- Formulario para añadir requisito -->
+  <div class="form-container">
+    <h3 class="subtitulo">Añadir Nuevo Requisito</h3>
+    <form (ngSubmit)="onSubmitNewRequisito()" #requisitoForm="ngForm">
+      <div class="form-group">
+        <label for="descripcion">Descripción:</label>
+        <input 
+          type="text" 
+          id="descripcion" 
+          name="descripcion" 
+          [(ngModel)]="newRequisito.descripcion" 
+          placeholder="Descripción del requisito" 
+          required />
+      </div>
+
+      <div class="form-group">
+        <label for="estadoId">ID Estado:</label>
+        <input 
+          type="number" 
+          id="estadoId" 
+          name="estadoId" 
+          [(ngModel)]="newRequisito.estadoId" 
+          placeholder="ID del estado" 
+          required 
+          min="1" />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="loading" class="btn-primario">
+          Añadir Requisito
+        </button>
+        <button type="button" (click)="onCancel()" class="btn-secundario">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Botón para recargar -->
+  <button class="btn btn-primario mb-3" (click)="cargarRequisitos()" [disabled]="loading">
+    Recargar Lista
+  </button>
+
+  <!-- Tabla de requisitos -->
+  <table class="tabla" *ngIf="!loading && filteredRequisitos.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Descripción</th>
+        <th>Estado ID</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let requisito of filteredRequisitos">
+        <td>{{ requisito.id }}</td>
+        <td>{{ requisito.descripcion }}</td>
+        <td>{{ requisito.estadoId }}</td>
+        <td>
+          <button (click)="deleteRequisito(requisito.id)" class="btn-danger btn-sm">
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Mensaje si no hay requisitos -->
+  <p *ngIf="filteredRequisitos.length === 0 && !loading && !error" class="texto-centro">
+    No hay requisitos que coincidan con la búsqueda.
+  </p>
+
+  <!-- Mensaje si no hay requisitos en la base de datos -->
+  <p *ngIf="requisitos.length === 0 && !loading && !error" class="texto-centro">
+    No hay requisitos registrados en el sistema.
+  </p>
+</div>

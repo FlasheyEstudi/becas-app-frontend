@@ -1,0 +1,82 @@
+<div class="estado-contenedor">
+  <h2 class="titulo-principal">Estados</h2>
+
+  <!-- Mensaje de error si existe -->
+  <div *ngIf="error" class="alerta">{{ error }}</div>
+
+  <!-- Indicador de carga -->
+  <div *ngIf="loading" class="loading">
+    Cargando...
+  </div>
+
+  <!-- Buscador -->
+  <div class="search-container">
+    <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()" placeholder="Buscar por nombre..."
+      class="search-input" />
+  </div>
+
+  <!-- Formulario para añadir estado -->
+  <div class="form-container">
+    <h3 class="subtitulo">Añadir Nuevo Estado</h3>
+    <form (ngSubmit)="onSubmitNewEstado()" #estadoForm="ngForm">
+      <div class="form-group">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" [(ngModel)]="newEstado.nombre" placeholder="Nombre del estado"
+          required />
+      </div>
+
+      <div class="form-group">
+        <label for="fechaRegistro">Fecha de Registro:</label>
+        <input type="date" id="fechaRegistro" name="fechaRegistro" [(ngModel)]="newEstado.fechaRegistro" required />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="loading" class="btn-primario">
+          Añadir Estado
+        </button>
+        <button type="button" (click)="onCancel()" class="btn-secundario">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Botón para recargar -->
+  <button class="btn btn-primario mb-3" (click)="cargarEstados()" [disabled]="loading">
+    Recargar Lista
+  </button>
+
+  <!-- Tabla de estados -->
+  <table class="tabla" *ngIf="!loading && filteredEstados.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Fecha de Registro</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let estado of filteredEstados">
+        <td>{{ estado.id }}</td>
+        <td>{{ estado.nombre }}</td>
+        <td>{{ estado.fechaRegistro | date:'dd/MM/yyyy' }}</td>
+        <td>
+          <button (click)="deleteEstado(estado.id)" class="btn-danger btn-sm">
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Mensaje si no hay estados -->
+  <p *ngIf="filteredEstados.length === 0 && !loading && !error" class="texto-centro">
+    No hay estados que coincidan con la búsqueda.
+  </p>
+
+  <!-- Mensaje si no hay estados en la base de datos -->
+  <p *ngIf="estados.length === 0 && !loading && !error" class="texto-centro">
+    No hay estados registrados en el sistema.
+  </p>
+</div>

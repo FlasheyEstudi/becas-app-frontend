@@ -1,0 +1,232 @@
+// variables (ajusta si tienes variables globales)
+$bg-start: #00c997;
+$bg-end: #00b4d8;
+$card-radius: 14px;
+$glass-border: rgba(255,255,255,0.18);
+$shadow: 0 15px 30px rgba(8, 30, 40, 0.12);
+$student-grad: linear-gradient(90deg, #7ce6d1 0%, #00b4d8 100%);
+$admin-grad: linear-gradient(90deg, #ff6b7a 0%, #d83349 100%);
+$muted: rgba(255,255,255,0.9);
+
+// full-screen background gradient
+.login-container {
+  width: 100vw;       // Ajuste para ocupar todo el ancho
+  height: 100vh;      // Ajuste para ocupar todo el alto
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #14c9a8 0%, #10b2d8 50%, #0fb0d5 100%);
+  background-attachment: fixed;
+  padding: 0;         // Quitamos el padding para que no haya franjas
+
+  &.admin {
+    background: linear-gradient(135deg, #12c3b0 0%, #0f9bb0 60%, #e34f5a 100%);
+  }
+}
+
+/* card */
+.login-card {
+  width: 420px;
+  max-width: calc(100% - 48px);
+  padding: 28px 34px;
+  border-radius: $card-radius;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  border: 1px solid $glass-border;
+  box-shadow: $shadow;
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px);
+  color: white;
+  text-align: center;
+  position: relative;
+}
+
+/* resto del código igual que el tuyo, sin cambios */
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 18px;
+
+  .tab-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.04);
+    color: $muted;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: background 0.18s, transform 0.12s;
+
+    i.material-icons { font-size: 18px; }
+
+    &.active, &.tab-button.active, &:hover {
+      background: rgba(255,255,255,0.12);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.logo {
+  margin: 8px auto 12px;
+  .logo-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    background: $student-grad;
+    border: 4px solid rgba(255,255,255,0.08);
+
+    i.material-icons { font-size: 30px; color: white; }
+
+    &.admin {
+      background: linear-gradient(90deg, #ff6b7a, #d83349);
+    }
+  }
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 6px 0;
+  color: white;
+}
+.subtitle {
+  font-size: 0.92rem;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 18px;
+}
+
+.form {
+  margin-top: 6px;
+  .input-group { margin-bottom: 14px; text-align: left; }
+
+  label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 6px;
+  }
+
+  .input-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.06);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 8px 12px;
+    height: 44px;
+    transition: box-shadow 0.18s, transform 0.12s;
+
+    & :focus, input:focus { outline: none; }
+
+    i.left { margin-right: 8px; color: rgba(255,255,255,0.85); }
+
+    input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.95);
+      font-size: 0.98rem;
+      padding: 6px 8px;
+    }
+
+    .eye {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: rgba(255,255,255,0.75);
+    }
+
+    &:focus-within {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.14);
+      transform: translateY(-1px);
+    }
+  }
+
+  .submit-button {
+    margin-top: 8px;
+    width: 100%;
+    height: 46px;
+    border-radius: 12px;
+    border: none;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.14);
+    transition: transform 0.15s, opacity 0.15s;
+    overflow: hidden;
+  }
+
+  .btn-student {
+    background: linear-gradient(90deg, #3dd8bd 0%, #00b4d8 100%);
+  }
+  .btn-admin {
+    background: linear-gradient(90deg, #ff6b7a 0%, #d83349 100%);
+  }
+
+  .submit-button:active { transform: translateY(1px); }
+  .submit-button[disabled] { opacity: 0.6; cursor: not-allowed; }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: rgba(255,255,255,0.95);
+    animation: spin 0.9s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-message {
+    margin-top: 10px;
+    color: #ffd6d6;
+    background: rgba(255,0,0,0.03);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+  }
+}
+
+/* links */
+.links {
+  margin-top: 14px;
+  .forgot { display: block; color: rgba(255,255,255,0.9); font-weight: 600; margin-bottom: 8px; text-decoration: none; }
+  .register { margin-top: 8px; color: rgba(255,255,255,0.85); font-size: 0.95rem; }
+  .register .register-link {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.06);
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+  }
+  a { color: white; text-decoration: none; }
+}
+
+/* footer */
+.footer-text {
+  margin-top: 18px;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.8);
+}

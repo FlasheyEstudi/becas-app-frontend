@@ -1,0 +1,93 @@
+<!-- sidebar.component.html -->
+<aside class="sidebar" [class.collapsed]="collapsed">
+  <div class="sidebar-header">
+    <span class="logo" *ngIf="!collapsed">🎓 Gestión Universitaria</span>
+    <button class="collapse-btn" (click)="toggleCollapse()" *ngIf="!collapsed">
+      <i class="material-icons">chevron_left</i>
+    </button>
+    <button class="collapse-btn" (click)="toggleCollapse()" *ngIf="collapsed">
+      <i class="material-icons">chevron_right</i>
+    </button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a routerLink="/dashboard"          class="nav-item" [class.active]="isActive('/dashboard')">
+      <span class="nav-icon">📊</span>
+      <span *ngIf="!collapsed">Dashboard</span>
+    </a>
+    <a routerLink="/estudiantes"        class="nav-item" [class.active]="isActive('/estudiantes')">
+      <span class="nav-icon">👥</span>
+      <span *ngIf="!collapsed">Estudiantes</span>
+    </a>
+    <a routerLink="/carreras"           class="nav-item" [class.active]="isActive('/carreras')">
+      <span class="nav-icon">📚</span>
+      <span *ngIf="!collapsed">Carreras</span>
+    </a>
+    <a routerLink="/area-conocimiento"  class="nav-item" [class.active]="isActive('/area-conocimiento')">
+      <span class="nav-icon">🧠</span>
+      <span *ngIf="!collapsed">Áreas</span>
+    </a>
+    <a routerLink="/requisitos"         class="nav-item" [class.active]="isActive('/requisitos')">
+      <span class="nav-icon">📋</span>
+      <span *ngIf="!collapsed">Requisitos</span>
+    </a>
+    <a routerLink="/tipo-beca"          class="nav-item" [class.active]="isActive('/tipo-beca')">
+      <span class="nav-icon">💰</span>
+      <span *ngIf="!collapsed">Tipos Beca</span>
+    </a>
+    <a routerLink="/periodo-academico"  class="nav-item" [class.active]="isActive('/periodo-academico')">
+      <span class="nav-icon">📅</span>
+      <span *ngIf="!collapsed">Períodos</span>
+    </a>
+    <a routerLink="/solicitud-beca"     class="nav-item" [class.active]="isActive('/solicitud-beca')">
+      <span class="nav-icon">📝</span>
+      <span *ngIf="!collapsed">Solicitudes</span>
+    </a>
+    <a routerLink="/estado"             class="nav-item" [class.active]="isActive('/estado')">
+      <span class="nav-icon">🔄</span>
+      <span *ngIf="!collapsed">Estados</span>
+    </a>
+    <a routerLink="/detalle-requisitos-beca" class="nav-item" [class.active]="isActive('/detalle-requisitos-beca')">
+      <span class="nav-icon">🔗</span>
+      <span *ngIf="!collapsed">Detalles</span>
+    </a>
+    <a routerLink="/documento"          class="nav-item" [class.active]="isActive('/documento')">
+      <span class="nav-icon">📄</span>
+      <span *ngIf="!collapsed">Documentos</span>
+    </a>
+    <a routerLink="/evaluacion"         class="nav-item" [class.active]="isActive('/evaluacion')">
+      <span class="nav-icon">📊</span>
+      <span *ngIf="!collapsed">Evaluaciones</span>
+    </a>
+    <a routerLink="/criterio-evaluacion"class="nav-item" [class.active]="isActive('/criterio-evaluacion')">
+      <span class="nav-icon">📏</span>
+      <span *ngIf="!collapsed">Criterios</span>
+    </a>
+    <a routerLink="/detalle-evaluacion" class="nav-item" [class.active]="isActive('/detalle-evaluacion')">
+      <span class="nav-icon">🔍</span>
+      <span *ngIf="!collapsed">Detalles</span>
+    </a>
+    <a routerLink="/auditoria"          class="nav-item" [class.active]="isActive('/auditoria')">
+      <span class="nav-icon">🔍</span>
+      <span *ngIf="!collapsed">Auditoría</span>
+    </a>
+    <a routerLink="/notificacion"       class="nav-item" [class.active]="isActive('/notificacion')">
+      <span class="nav-icon">🔔</span>
+      <span *ngIf="!collapsed">Notificaciones</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="avatar">{{ userName.charAt(0).toUpperCase() }}</div>
+      <div>
+        <strong *ngIf="!collapsed">{{ userName }}</strong><br>
+        <small *ngIf="!collapsed">{{ userRole }}</small>
+      </div>
+    </div>
+    <button class="nav-item logout-btn" (click)="logout()">
+      <span class="nav-icon">🚪</span>
+      <span *ngIf="!collapsed">Cerrar Sesión</span>
+    </button>
+  </div>
+</aside>

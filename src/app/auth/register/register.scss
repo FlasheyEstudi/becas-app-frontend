@@ -1,0 +1,136 @@
+// Variables (manteniendo tus valores exactos)
+$card-radius: 14px;
+$glass-border: rgba(255, 255, 255, 0.18);
+$shadow: 0 15px 30px rgba(8, 30, 40, 0.12);
+$muted: rgba(255, 255, 255, 0.9);
+$student-grad: linear-gradient(90deg, #7ce6d1 0%, #00b4d8 100%);
+$verde-principal: #3dd8bd;
+$rojo-error: #ffd6d6;
+
+// Solución para la franja roja (sin modificar el diseño)
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden; // Esto elimina la franja roja
+}
+
+.register-container {
+  min-height: 100vh;
+  width: 100%;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #14c9a8 0%, #10b2d8 50%, #0fb0d5 100%);
+  background-attachment: fixed;
+}
+
+// El resto del código permanece EXACTAMENTE igual
+.register-card {
+  width: 420px;
+  max-width: 100%;
+  padding: 28px 34px;
+  border-radius: $card-radius;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+  border: 1px solid $glass-border;
+  box-shadow: $shadow;
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px);
+  color: white;
+  text-align: center;
+  position: relative;
+  font-family: 'Roboto', sans-serif;
+  margin: 20px; // Añadido para espacio en móviles
+
+  form {
+    margin-top: 6px;
+    text-align: left;
+
+    .input-group {
+      margin-bottom: 14px;
+
+      label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.88rem;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 6px;
+      }
+
+      .input-field {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 8px 12px;
+        height: 44px;
+        transition: box-shadow 0.18s, transform 0.12s;
+
+        & :focus,
+        input:focus,
+        select:focus {
+          outline: none;
+        }
+
+        input,
+        select {
+          flex: 1;
+          border: none;
+          background: transparent;
+          color: rgba(255, 255, 255, 0.95);
+          font-size: 0.98rem;
+          padding: 6px 8px;
+          font-family: 'Roboto', sans-serif;
+          border-radius: 10px;
+        }
+
+        &:focus-within {
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+          transform: translateY(-1px);
+          border-color: $student-grad;
+        }
+      }
+    }
+
+    button[type='submit'] {
+      margin-top: 8px;
+      width: 100%;
+      height: 46px;
+      border-radius: 12px;
+      border: none;
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+      background: linear-gradient(90deg, #3dd8bd 0%, #00b4d8 100%);
+      transition: transform 0.15s, opacity 0.15s;
+      overflow: hidden;
+
+      &:active {
+        transform: translateY(1px);
+      }
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+
+    .error-message {
+      margin-top: 10px;
+      color: $rojo-error;
+      background: rgba(255, 0, 0, 0.03);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-align: center;
+    }
+  }
+}

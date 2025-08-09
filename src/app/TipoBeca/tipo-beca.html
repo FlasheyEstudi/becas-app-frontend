@@ -1,0 +1,126 @@
+<div class="tipo-beca-contenedor">
+  <h2 class="titulo-principal">Tipos de Beca</h2>
+
+  <!-- Mensaje de error si existe -->
+  <div *ngIf="error" class="alerta">{{ error }}</div>
+
+  <!-- Indicador de carga -->
+  <div *ngIf="loading" class="loading">
+    Cargando...
+  </div>
+
+  <!-- Buscador -->
+  <div class="search-container">
+    <input 
+      type="text" 
+      [(ngModel)]="searchTerm" 
+      (input)="onSearch()" 
+      placeholder="Buscar por nombre..." 
+      class="search-input" />
+  </div>
+
+  <!-- Formulario para añadir tipo de beca -->
+  <div class="form-container">
+    <h3 class="subtitulo">Añadir Nuevo Tipo de Beca</h3>
+    <form (ngSubmit)="onSubmitNewTipoBeca()" #tipoBecaForm="ngForm">
+      <div class="form-group">
+        <label for="nombre">Nombre:</label>
+        <input 
+          type="text" 
+          id="nombre" 
+          name="nombre" 
+          [(ngModel)]="newTipoBeca.nombre" 
+          placeholder="Nombre del tipo de beca" 
+          required />
+      </div>
+
+      <div class="form-group">
+        <label for="descripcion">Descripción:</label>
+        <textarea 
+          id="descripcion" 
+          name="descripcion" 
+          [(ngModel)]="newTipoBeca.descripcion" 
+          placeholder="Descripción del tipo de beca" 
+          required 
+          class="form-textarea"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="monto">Monto:</label>
+        <input 
+          type="number" 
+          id="monto" 
+          name="monto" 
+          [(ngModel)]="newTipoBeca.monto" 
+          placeholder="Monto de la beca" 
+          required 
+          min="0" 
+          step="0.01" />
+      </div>
+
+      <div class="form-group">
+        <label for="estadoId">ID Estado:</label>
+        <input 
+          type="number" 
+          id="estadoId" 
+          name="estadoId" 
+          [(ngModel)]="newTipoBeca.estadoId" 
+          placeholder="ID del estado" 
+          required 
+          min="1" />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="loading" class="btn-primario">
+          Añadir Tipo de Beca
+        </button>
+        <button type="button" (click)="onCancel()" class="btn-secundario">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Botón para recargar -->
+  <button class="btn btn-primario mb-3" (click)="cargarTiposBeca()" [disabled]="loading">
+    Recargar Lista
+  </button>
+
+  <!-- Tabla de tipos de beca -->
+  <table class="tabla" *ngIf="!loading && filteredTiposBeca.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Monto</th>
+        <th>Estado ID</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let tipoBeca of filteredTiposBeca">
+        <td>{{ tipoBeca.id }}</td>
+        <td>{{ tipoBeca.nombre }}</td>
+        <td>{{ tipoBeca.descripcion }}</td>
+        <td>{{ tipoBeca.monto | currency:'USD':'symbol':'1.2-2' }}</td>
+        <td>{{ tipoBeca.estadoId }}</td>
+        <td>
+          <button (click)="deleteTipoBeca(tipoBeca.id)" class="btn-danger btn-sm">
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Mensaje si no hay tipos de beca -->
+  <p *ngIf="filteredTiposBeca.length === 0 && !loading && !error" class="texto-centro">
+    No hay tipos de beca que coincidan con la búsqueda.
+  </p>
+
+  <!-- Mensaje si no hay tipos de beca en la base de datos -->
+  <p *ngIf="tiposBeca.length === 0 && !loading && !error" class="texto-centro">
+    No hay tipos de beca registrados en el sistema.
+  </p>
+</div>

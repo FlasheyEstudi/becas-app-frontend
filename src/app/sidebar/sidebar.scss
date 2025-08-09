@@ -1,0 +1,197 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+.sidebar {
+  --side-width: 260px;
+  --side-width-collapsed: 60px;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--side-width);
+  height: 100vh;
+  background: var(--navbar-bg);
+  color: var(--navbar-text-color);
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--card-shadow);
+  z-index: 1100;
+  overflow-y: auto;
+  transition: width 0.3s ease;
+
+  /* Header fijo */
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 1.1rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+  }
+
+  /* Botón de colapso */
+  .collapse-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--navbar-text-color);
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  /* Navegación */
+  .sidebar-nav {
+    flex: 1;
+    padding: 0.5rem 0;
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      margin: 0.25rem 0.75rem;
+      border-radius: 8px;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--nav-link-color);
+      transition: all 0.2s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      &.active,
+      &:hover {
+        background: var(--nav-link-hover-bg);
+        color: var(--nav-link-hover-color);
+      }
+
+      .nav-icon { 
+        font-size: 1.3rem; 
+        width: 24px; 
+        text-align: center; 
+      }
+    }
+
+    /* logout-btn = nav-item */
+    .logout-btn {
+      margin: 0.25rem 0.75rem;
+      background: var(--btn-danger-bg);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      white-space: nowrap;
+      
+      &:hover { 
+        background: var(--btn-danger-hover-bg); 
+      }
+    }
+  }
+
+  /* Footer usuario */
+  .sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      .avatar {
+        width: 36px;
+        height: 36px;
+        background: var(--btn-primary-bg);
+        color: #fff;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      strong { 
+        font-size: 0.9rem; 
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      small  { 
+        font-size: 0.75rem; 
+        opacity: 0.8; 
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  /* scrollbar fina */
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.25); border-radius: 3px; }
+
+  /* Estado colapsado */
+  &.collapsed {
+    width: var(--side-width-collapsed);
+    
+    .sidebar-header {
+      justify-content: center;
+      padding: 1rem 0;
+    }
+    
+    .nav-item {
+      justify-content: center;
+      gap: 0;
+      padding: 0.75rem;
+      
+      .nav-icon {
+        margin-right: 0;
+      }
+      
+      span {
+        display: none;
+      }
+    }
+    
+    .logout-btn {
+      justify-content: center;
+      padding: 0.75rem;
+      
+      span {
+        display: none;
+      }
+    }
+    
+    .user-card {
+      flex-direction: column;
+      gap: 0.25rem;
+      
+      .avatar {
+        margin-right: 0;
+      }
+      
+      strong, small {
+        display: none;
+      }
+    }
+  }
+}

@@ -1,0 +1,58 @@
+<!-- src/app/dashboard/dashboard.html -->
+<div class="dashboard-v2">
+  <!-- Header -->
+  <header class="welcome-banner">
+    <h1>Panel Administrativo</h1>
+    <p>Gestiona y supervisa el sistema de becas estudiantiles</p>
+  </header>
+
+  <!-- KPIs -->
+  <section class="kpi-grid">
+    <div class="kpi-card" *ngFor="let kpi of kpis">
+      <span class="kpi-icon">{{ kpi.icon }}</span>
+      <h2>{{ kpi.value | number }}</h2>
+      <p>{{ kpi.label }}</p>
+      <span class="kpi-delta" [class.up]="kpi.deltaType === 'up'" [class.down]="kpi.deltaType === 'down'">
+        {{ kpi.delta > 0 ? '+' : '' }}{{ kpi.delta }} este mes
+      </span>
+    </div>
+  </section>
+
+  <!-- Gráficos principales -->
+  <section class="charts-section">
+    <div class="chart-card">
+      <h3>Tendencia Mensual (6 meses)</h3>
+      <canvas id="trendChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>Distribución de Estados</h3>
+      <canvas id="statusChart"></canvas>
+    </div>
+  </section>
+
+  <!-- Tabla de solicitudes pendientes con datos reales -->
+  <section class="quick-table">
+    <h3>Solicitudes Pendientes</h3>
+    <table class="table-modern">
+      <thead>
+        <tr>
+          <th>Estudiante</th>
+          <th>Tipo</th>
+          <th>Fecha</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let request of pendingRequests">
+          <td>{{ request.estudiante }}</td>
+          <td>{{ request.tipo }}</td>
+          <td>{{ request.fecha }}</td>
+          <td><button class="btn-sm">Revisar</button></td>
+        </tr>
+        <tr *ngIf="pendingRequests.length === 0">
+          <td colspan="4" class="no-data">No hay solicitudes pendientes</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</div>

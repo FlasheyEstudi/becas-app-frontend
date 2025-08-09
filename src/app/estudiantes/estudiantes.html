@@ -1,0 +1,122 @@
+<div class="estudiantes-contenedor">
+  <h1 class="titulo-principal">Gestión de Estudiantes</h1>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <span class="kpi-icon">👥</span>
+      <h2>{{ totalEstudiantes | number }}</h2>
+      <p>Estudiantes Registrados</p>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-icon">✅</span>
+      <h2>{{ activos | number }}</h2>
+      <p>Estudiantes Activos</p>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-icon">📚</span>
+      <h2>{{ carreras | number }}</h2>
+      <p>Carreras Representadas</p>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-icon">📅</span>
+      <h2>{{ edadPromedio | number:'1.0-0' }}</h2>
+      <p>Edad Promedio</p>
+    </div>
+  </div>
+
+  <!-- Buscador y filtros -->
+  <div class="search-filters">
+    <input type="text" class="search-input" placeholder="Buscar por nombre o correo..." [(ngModel)]="searchTerm"
+      (input)="onSearch()" />
+    <select class="filter-select" [(ngModel)]="filtroEstado" (change)="onFilterChange()">
+      <option value="">Todos los estados</option>
+      <option *ngFor="let estado of estadosDisponibles" [value]="estado.id">
+        {{ estado.nombre }}
+      </option>
+    </select>
+    <select class="filter-select" [(ngModel)]="filtroCarrera" (change)="onFilterChange()">
+      <option value="">Todas las carreras</option>
+      <option *ngFor="let carrera of carrerasDisponibles" [value]="carrera.id">
+        {{ carrera.nombre }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Formulario flotante -->
+  <div class="form-container">
+    <h2 class="subtitulo">Nuevo Estudiante</h2>
+    <form (ngSubmit)="onSubmitNewStudent()">
+      <div class="form-group">
+        <label>Nombre</label>
+        <input [(ngModel)]="newStudent.nombre" name="nombre" required />
+      </div>
+      <div class="form-group">
+        <label>Apellidos</label>
+        <input [(ngModel)]="newStudent.apellidos" name="apellidos" required />
+      </div>
+      <div class="form-group">
+        <label>Edad</label>
+        <input type="number" [(ngModel)]="newStudent.edad" name="edad" required min="16" max="100" />
+      </div>
+      <div class="form-group">
+        <label>Correo</label>
+        <input type="email" [(ngModel)]="newStudent.correo" name="correo" required />
+      </div>
+      <div class="form-group">
+        <label>Carrera</label>
+        <select [(ngModel)]="newStudent.carreraId" name="carreraId">
+          <option value="">Seleccionar carrera</option>
+          <option *ngFor="let carrera of carrerasDisponibles" [value]="carrera.id">
+            {{ carrera.nombre }}
+          </option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <select [(ngModel)]="newStudent.estadoId" name="estadoId">
+          <option value="">Seleccionar estado</option>
+          <option *ngFor="let estado of estadosDisponibles" [value]="estado.id">
+            {{ estado.nombre }}
+          </option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primario">Añadir</button>
+        <button type="button" class="btn-primario" (click)="onCancel()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tabla dinámica -->
+  <table class="table-modern">
+    <thead>
+      <tr>
+        <th>Estudiante</th>
+        <th>Edad</th>
+        <th>Carrera</th>
+        <th>Email</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let e of filteredEstudiantes">
+        <td>{{ e.nombre }} {{ e.apellido }}</td>
+        <td>{{ e.edad }} años</td>
+        <td>{{ getCarreraNombre(e.carreraId) || '-' }}</td>
+        <td>{{ e.correo }}</td>
+        <td>{{ getEstadoNombre(e.estadoId) || '-' }}</td>
+        <td>
+          <button class="btn-danger" (click)="deleteEstudiante(e.id)">
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="filteredEstudiantes.length === 0" class="texto-centro">
+    No hay estudiantes que coincidan con los filtros.
+  </p>
+</div>

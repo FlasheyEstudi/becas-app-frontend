@@ -1,0 +1,75 @@
+<div class="area-conocimiento-contenedor">
+  <h2 class="titulo-principal">Áreas de Conocimiento</h2>
+
+  <!-- Mensaje de error si existe -->
+  <div *ngIf="error" class="alerta">{{ error }}</div>
+
+  <!-- Indicador de carga -->
+  <div *ngIf="loading" class="loading">
+    Cargando...
+  </div>
+
+  <!-- Buscador -->
+  <div class="search-container">
+    <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()" placeholder="Buscar por nombre..."
+      class="search-input" />
+  </div>
+
+  <!-- Formulario para añadir área de conocimiento -->
+  <div class="form-container">
+    <h3 class="subtitulo">Añadir Nueva Área de Conocimiento</h3>
+    <form (ngSubmit)="onSubmitNewArea()" #areaForm="ngForm">
+      <div class="form-group">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" [(ngModel)]="newArea.nombre"
+          placeholder="Nombre del área de conocimiento" required />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="loading" class="btn-primario">
+          Añadir Área
+        </button>
+        <button type="button" (click)="onCancel()" class="btn-secundario">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Botón para recargar -->
+  <button class="btn btn-primario mb-3" (click)="cargarAreas()" [disabled]="loading">
+    Recargar Lista
+  </button>
+
+  <!-- Tabla de áreas de conocimiento -->
+  <table class="tabla" *ngIf="!loading && filteredAreas.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let area of filteredAreas">
+        <td>{{ area.id }}</td>
+        <td>{{ area.nombre }}</td>
+        <td>
+          <button (click)="deleteArea(area.id)" class="btn-danger btn-sm">
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Mensaje si no hay áreas -->
+  <p *ngIf="filteredAreas.length === 0 && !loading && !error" class="texto-centro">
+    No hay áreas de conocimiento que coincidan con la búsqueda.
+  </p>
+
+  <!-- Mensaje si no hay áreas en la base de datos -->
+  <p *ngIf="areas.length === 0 && !loading && !error" class="texto-centro">
+    No hay áreas de conocimiento registradas en el sistema.
+  </p>
+</div>

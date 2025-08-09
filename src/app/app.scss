@@ -1,0 +1,104 @@
+/* app.scss corregido */
+
+/* Reinicio básico mejorado */
+html {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  position: relative; /* Añadido para contener elementos absolutos */
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* Fondo general - modificado para evitar desbordamiento */
+body {
+  background: linear-gradient(135deg, #009dd5 0%, #12a19a 100%);
+  color: #333333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Contenedores principales - solución definitiva */
+.login-container,
+.register-container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px 16px; /* Padding simétrico */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #14c9a8 0%, #10b2d8 50%, #0fb0d5 100%);
+  background-attachment: fixed;
+  position: relative;
+  overflow: hidden; /* Asegura que nada se desborde */
+}
+
+/* Tarjetas - ajuste mínimo */
+.login-card,
+.register-card {
+  width: 100%;
+  max-width: 420px; /* Máximo ancho pero flexible */
+  padding: 28px 34px;
+  margin: 0 auto; /* Centrado seguro */
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 15px 30px rgba(8, 30, 40, 0.12);
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px);
+  color: white;
+  text-align: center;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Elementos de formulario - prevención de desbordamiento */
+input, select, textarea, button {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Media query para pantallas muy pequeñas (opcional) */
+@media (max-width: 360px) {
+  .login-card,
+  .register-card {
+    padding: 20px 16px;
+  }
+
+  /* only add this once */
+main.with-sidebar {
+  margin-left: 260px; // same as --sidebar-width
+  transition: margin-left 0.3s ease;
+
+  .sidebar.collapsed + & { margin-left: 72px; }
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+  }
+}
+.layout {
+  display: flex;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 260px; /* mismo que --side-width */
+  transition: margin-left 0.3s ease;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+  }
+}
+}

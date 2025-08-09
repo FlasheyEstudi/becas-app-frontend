@@ -1,0 +1,67 @@
+<!-- carreras.component.html -->
+<div class="carreras-contenedor">
+  <div class="card-container">
+    <h1 class="titulo-principal">Gestión de Carreras</h1>
+
+    <!-- Buscador -->
+    <div class="top-bar">
+      <input type="text" class="search-input" placeholder="Buscar por nombre..." [(ngModel)]="searchTerm"
+        (input)="onSearch()">
+    </div>
+
+    <!-- Formulario para nueva carrera -->
+    <div class="form-card">
+      <h2 class="subtitulo">Nueva Carrera</h2>
+      <form (ngSubmit)="onSubmitNewCarrera()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nombre:</label>
+            <input type="text" [(ngModel)]="newCarrera.nombre" name="nombre" required
+              placeholder="Nombre de la carrera">
+          </div>
+
+          <div class="form-group">
+            <label>Área de Conocimiento ID:</label>
+            <input type="number" [(ngModel)]="newCarrera.areaConocimientoId" name="areaConocimientoId" required
+              placeholder="ID del área de conocimiento">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primario">Agregar Carrera</button>
+          <button type="button" class="btn-secundario" (click)="onCancel()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Tabla de carreras -->
+    <div class="tabla-wrapper">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Área de Conocimiento</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let carrera of filteredCarreras">
+            <td>{{ carrera.id }}</td>
+            <td>{{ carrera.nombre }}</td>
+            <td>{{ carrera.areaConocimientoId }}</td>
+            <td>
+              <button class="btn-danger" (click)="deleteCarrera(carrera.id)">
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p *ngIf="filteredCarreras.length === 0" class="texto-centro">
+        No hay carreras que coincidan con los filtros.
+      </p>
+    </div>
+  </div>
+</div>

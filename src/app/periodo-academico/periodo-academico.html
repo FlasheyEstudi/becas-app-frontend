@@ -1,0 +1,137 @@
+<div class="periodo-academico-contenedor">
+  <h2 class="titulo-principal">Períodos Académicos</h2>
+  
+  <!-- Mensaje de error si existe -->
+  <div *ngIf="error" class="alerta">{{ error }}</div>
+  
+  <!-- Indicador de carga -->
+  <div *ngIf="loading" class="loading">
+    Cargando...
+  </div>
+  
+  <!-- Buscador -->
+  <div class="search-container">
+    <input 
+      type="text" 
+      [(ngModel)]="searchTerm" 
+      (input)="onSearch()" 
+      placeholder="Buscar por nombre o año..." 
+      class="search-input" />
+  </div>
+  
+  <!-- Formulario para añadir período académico -->
+  <div class="form-container">
+    <h3 class="subtitulo">Añadir Nuevo Período Académico</h3>
+    <form (ngSubmit)="onSubmitNewPeriodo()" #periodoForm="ngForm">
+      <div class="form-group">
+        <label for="nombre">Nombre:</label>
+        <input 
+          type="text" 
+          id="nombre" 
+          name="nombre" 
+          [(ngModel)]="newPeriodo.nombre" 
+          placeholder="Nombre del período" 
+          required />
+      </div>
+      
+      <div class="form-group">
+        <label for="anioAcademico">Año Académico:</label>
+        <input 
+          type="text" 
+          id="anioAcademico" 
+          name="anioAcademico" 
+          [(ngModel)]="newPeriodo.anioAcademico" 
+          placeholder="Ej. 2025-2026" 
+          required />
+      </div>
+      
+      <div class="form-group">
+        <label for="fechaInicio">Fecha Inicio:</label>
+        <input 
+          type="date" 
+          id="fechaInicio" 
+          name="fechaInicio" 
+          [(ngModel)]="newPeriodo.fechaInicio" 
+          required />
+      </div>
+      
+      <div class="form-group">
+        <label for="fechaFin">Fecha Fin:</label>
+        <input 
+          type="date" 
+          id="fechaFin" 
+          name="fechaFin" 
+          [(ngModel)]="newPeriodo.fechaFin" 
+          required />
+      </div>
+      
+      <div class="form-group">
+        <label for="estadoId">ID Estado:</label>
+        <input 
+          type="number" 
+          id="estadoId" 
+          name="estadoId" 
+          [(ngModel)]="newPeriodo.estadoId" 
+          placeholder="ID del estado" 
+          required 
+          min="1" />
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" [disabled]="loading" class="btn-primario">
+          Añadir Período
+        </button>
+        <button type="button" (click)="onCancel()" class="btn-secundario">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+  
+  <!-- Botón para recargar -->
+  <button class="btn btn-primario mb-3" (click)="cargarPeriodos()" [disabled]="loading">
+    Recargar Lista
+  </button>
+  
+  <!-- Tabla de períodos académicos -->
+  <table class="tabla" *ngIf="!loading && filteredPeriodos.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Año Académico</th>
+        <th>Fecha Inicio</th>
+        <th>Fecha Fin</th>
+        <th>Estado ID</th>
+        <!-- <th>Estado Nombre</th> --> <!-- Eliminado -->
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let periodo of filteredPeriodos">
+        <td>{{ periodo.id }}</td>
+        <td>{{ periodo.nombre }}</td>
+        <td>{{ periodo.anioAcademico }}</td>
+        <td>{{ periodo.fechaInicio | date:'dd/MM/yyyy' }}</td>
+        <td>{{ periodo.fechaFin | date:'dd/MM/yyyy' }}</td>
+        <td>{{ periodo.estadoId }}</td>
+        <!-- <td>{{ periodo.estadoNombre || 'N/A' }}</td> --> <!-- Eliminado -->
+        <td>
+          <button (click)="deletePeriodo(periodo.id)" class="btn-danger btn-sm">
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <!-- Mensaje si no hay períodos -->
+  <p *ngIf="filteredPeriodos.length === 0 && !loading && !error" class="texto-centro">
+    No hay períodos académicos que coincidan con la búsqueda.
+  </p>
+  
+  <!-- Mensaje si no hay períodos en la base de datos -->
+  <p *ngIf="periodos.length === 0 && !loading && !error" class="texto-centro">
+    No hay períodos académicos registrados en el sistema.
+  </p>
+</div>

@@ -1,0 +1,217 @@
+/* ===================================================================
+   DASHBOARD FINAL  (adaptado al sidebar fijo)
+   – Sin duplicados con el sidebar
+   – 100 % variables oficiales
+   – Responsive
+=================================================================== */
+
+/* 1. Reset básico y fuente */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+.dashboard-v2 {
+  margin-left: 260px;               /* desplazado por el sidebar fijo */
+  padding: 2rem;
+  background: var(--body-bg);
+  color: var(--text-color);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  box-sizing: border-box;
+
+  /* 2. Responsive: en móvil el sidebar se superpone → sin margen */
+  @media (max-width: 768px) {
+    margin-left: 0;
+    padding: 1rem;
+  }
+}
+
+/* 3. Header centrado */
+.welcome-banner {
+  text-align: center;
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-color);
+  }
+
+  p {
+    font-size: 0.95rem;
+    margin-top: 0.25rem;
+    opacity: 0.8;
+  }
+}
+
+/* 4. KPIs compactos */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+
+  .kpi-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    &:hover { 
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(8, 30, 40, 0.2);
+    }
+
+    .kpi-icon { 
+      font-size: 2rem; 
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    
+    h2 { 
+      font-size: 1.75rem; 
+      margin: 0; 
+      font-weight: 700; 
+      color: var(--text-color);
+    }
+    
+    p  { 
+      margin: 0.25rem 0; 
+      opacity: 0.9; 
+      color: var(--text-color);
+    }
+
+    .kpi-delta {
+      font-size: 0.8rem;
+      font-weight: 600;
+
+      &.up   { color: #10b981; }
+      &.down { color: #ef4444; }
+    }
+  }
+}
+
+/* 5. Gráficos */
+.charts-section {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    height: 240px;
+
+    h3 { 
+      margin: 0 0 0.75rem; 
+      font-size: 1rem; 
+      color: var(--text-color);
+    }
+    
+    canvas { 
+      width: 100% !important; 
+      height: 100% !important; 
+      min-height: 180px;
+    }
+  }
+}
+
+/* 6. Tabla de "Solicitudes Pendientes" */
+.quick-table {
+  margin-top: 2rem;
+
+  h3 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: var(--text-color);
+  }
+
+  .table-modern {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      color: var(--text-color);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    th {
+      background: var(--table-header-bg);
+      color: var(--table-header-color);
+      font-weight: 600;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: var(--table-row-hover-bg);
+    }
+
+    .btn-sm {
+      background: var(--btn-primary-bg);
+      color: white;
+      border: none;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-weight: 600;
+
+      &:hover {
+        background: var(--btn-primary-hover-bg);
+      }
+    }
+  }
+}
+
+/* 7. Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard-v2 {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 8. Estado de carga */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  color: var(--text-color);
+  
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid var(--btn-primary-bg);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 0.5rem;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+}
