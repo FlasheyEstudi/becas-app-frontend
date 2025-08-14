@@ -1,0 +1,97 @@
+<div class="becas-container">
+  <h2>Becas Disponibles</h2>
+
+  <!-- Filtro y buscador -->
+  <div class="filtro-buscador">
+    <div class="buscador">
+      <label for="buscarBeca">Buscar beca</label>
+      <input 
+        id="buscarBeca" 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (input)="onSearch()" 
+        placeholder="Nombre, descripción..."
+      >
+    </div>
+    <div class="filtros">
+      <label for="filtroCategoria">Filtrar por categoría</label>
+      <select 
+        id="filtroCategoria" 
+        [(ngModel)]="filtroCategoria" 
+        (change)="onSearch()"
+      >
+        <option value="all">Todas las becas</option>
+        <option value="excelencia">Becas de excelencia</option>
+        <option value="completa">Becas completas</option>
+        <option value="generales">Becas generales</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Estado de carga -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    Cargando becas disponibles...
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <!-- Lista de becas -->
+  <div class="lista-becas" *ngIf="!loading && filteredBecas.length > 0">
+    <div 
+      class="card-beca" 
+      *ngFor="let beca of filteredBecas"
+      tabindex="0"
+      role="region"
+      [attr.aria-label]="'Beca ' + beca.nombre"
+    >
+      <div class="card-header">
+        <h3>{{ beca.nombre }}</h3>
+        <span class="badge-porcentaje">{{ beca.cobertura }}%</span>
+      </div>
+      <p class="descripcion">{{ beca.descripcion }}</p>
+      <div class="detalles">
+        <p><strong>Monto:</strong> {{ beca.valor }}</p>
+        <p><strong>Fecha límite:</strong> {{ beca.fechaLimite | date:'dd/MM/yyyy' }}</p>
+        <p><strong>Beneficiarios:</strong> {{ beca.beneficiarios }}</p>
+      </div>
+      <div class="acciones">
+        <button 
+          (click)="verDetalles(beca); $event.stopPropagation()" 
+          [attr.aria-label]="'Ver detalles de ' + beca.nombre"
+          type="button"
+        >
+          Ver detalles
+        </button>
+        <button 
+          (click)="abrirSolicitudModal(beca); $event.stopPropagation()" 
+          [attr.aria-label]="'Solicitar la beca ' + beca.nombre"
+          type="button"
+        >
+          Solicitar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje cuando no hay becas -->
+  <div *ngIf="!loading && filteredBecas.length === 0" class="sin-becas">
+    No se encontraron becas disponibles con los criterios actuales.
+  </div>
+
+  <!-- Modal de detalles -->
+  <app-beca-modal
+    [beca]="becaSeleccionada"
+    [isOpen]="showModal"
+    (closeModal)="cerrarModal()">
+  </app-beca-modal>
+
+  <!-- Modal de solicitud -->
+  <app-beca-solicitud-modal
+    [beca]="becaSeleccionada"
+    [isOpen]="showSolicitudModal"
+    (closeModal)="cerrarSolicitudModal()"
+    (solicitarBeca)="solicitarBecaDesdeModal($event)">
+  </app-beca-solicitud-modal>
+</div>

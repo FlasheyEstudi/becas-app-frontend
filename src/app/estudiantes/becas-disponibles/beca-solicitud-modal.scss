@@ -1,0 +1,164 @@
+.modal-solicitud {
+  &.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 11000;
+  }
+
+  & .modal-content {
+    background: var(--card-bg);
+    padding: 2rem 2.5rem;
+    border-radius: 16px;
+    max-width: 520px;
+    width: 90%;
+    color: var(--text-color);
+    box-shadow: var(--card-shadow);
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+  }
+
+  & .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    h2 {
+      font-weight: 700;
+      font-size: 1.6rem;
+      margin: 0;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: var(--text-color);
+      transition: color 0.3s ease;
+
+      i.material-icons {
+        vertical-align: middle;
+      }
+
+      &:hover {
+        color: var(--btn-danger-bg);
+      }
+    }
+  }
+
+  & .modal-body {
+    .beca-info {
+      margin-bottom: 1.5rem;
+
+      h3 {
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+      }
+
+      p {
+        margin: 0.3rem 0;
+        strong {
+          font-weight: 600;
+        }
+      }
+    }
+
+    .formulario-solicitud {
+      h4 {
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+
+        .form-group {
+          margin-bottom: 1.1rem;
+
+          label {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-weight: 600;
+          }
+
+          input,
+          textarea {
+            width: 100%;
+            padding: 0.5rem 0.9rem;
+            font-size: 1rem;
+            border-radius: 10px;
+            border: 1.5px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text-color);
+            transition: border-color 0.3s ease;
+
+            &:focus {
+              border-color: var(--btn-primary-bg);
+              outline: none;
+              background: rgba(255, 255, 255, 0.12);
+            }
+          }
+
+          textarea {
+            min-height: 90px;
+            resize: vertical;
+          }
+        }
+
+        .form-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 0.8rem;
+          margin-top: 1.3rem;
+
+          .btn-cancelar,
+          .btn-solicitar {
+            padding: 0.65rem 1.6rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--card-shadow);
+            border: none;
+            transition: background 0.3s ease, transform 0.15s ease;
+            user-select: none;
+          }
+
+          .btn-cancelar {
+            background: var(--btn-secondary-bg);
+            color: var(--text-color);
+
+            &:hover {
+              background: var(--btn-secondary-hover-bg);
+              transform: translateY(-2px);
+            }
+          }
+
+          .btn-solicitar {
+            background: var(--btn-primary-bg);
+            color: var(--text-color);
+
+            &:hover:not(:disabled) {
+              background: var(--btn-primary-hover-bg);
+              transform: translateY(-2px);
+            }
+
+            &:disabled {
+              opacity: 0.6;
+              cursor: not-allowed;
+              transform: none;
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+<div class="detalle-beca-container" role="main">
+  <button class="btn-volver" (click)="volver()">
+    <i class="material-icons">arrow_back</i> Volver a becas
+  </button>
+
+  <div class="detalle-content">
+    <div class="detalle-header">
+      <h1 class="titulo-principal">{{ beca?.nombre }}</h1>
+      <div class="cobertura-badge">
+        <span class="porcentaje">{{ beca?.cobertura }}% de cobertura</span>
+      </div>
+    </div>
+
+    <div class="detalle-body">
+      <div class="detalle-info">
+        <div class="info-seccion">
+          <h3>Descripción</h3>
+          <p>{{ beca?.descripcion }}</p>
+        </div>
+
+        <div class="info-seccion">
+          <h3>Requisitos</h3>
+          <ul>
+            <li *ngFor="let requisito of beca?.requisitos">{{ requisito }}</li>
+          </ul>
+        </div>
+
+        <div class="info-seccion">
+          <h3>Detalles adicionales</h3>
+          <div class="detalles-lista">
+            <p><strong>Fecha límite:</strong> {{ beca?.fechaLimite }}</p>
+            <p><strong>Beneficiarios:</strong> {{ beca?.beneficiarios }}</p>
+            <p><strong>Tipo:</strong> {{ beca?.tipo }}</p>
+            <p><strong>Valor estimado:</strong> {{ beca?.valor }}</p>
+          </div>
+        </div>
+
+        <div class="accion-solicitud">
+          <button 
+            class="btn-solicitar" 
+            (click)="solicitarBeca()">
+            Solicitar Beca
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

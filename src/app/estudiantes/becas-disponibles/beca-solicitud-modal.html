@@ -1,0 +1,92 @@
+<div *ngIf="isOpen" class="modal-solicitud modal-overlay" (click)="closeModalHandler()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Solicitar Beca</h2>
+      <button class="close-btn" aria-label="Cerrar modal" (click)="closeModalHandler()">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="beca">
+      <div class="beca-info">
+        <h3>{{ beca.nombre }}</h3>
+        <p><strong>Descripción:</strong> {{ beca.descripcion }}</p>
+        <p><strong>Cobertura:</strong> {{ beca.cobertura }}%</p>
+        <p><strong>Fecha límite:</strong> {{ beca.fechaLimite }}</p>
+        <p><strong>Valor:</strong> {{ beca.valor }}</p>
+      </div>
+
+      <div class="formulario-solicitud">
+        <h4>Datos de solicitud</h4>
+        <form (ngSubmit)="onSubmit()" #solicitudForm="ngForm">
+          <div class="form-group">
+            <label>Estudiante</label>
+            <input
+              type="text"
+              [value]="solicitudFormModel.estudianteId"
+              readonly
+              placeholder="ID del estudiante"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Tipo de Beca</label>
+            <input
+              type="text"
+              [value]="solicitudFormModel.tipoBecaId"
+              readonly
+              placeholder="ID del tipo de beca"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Estado</label>
+            <input
+              type="text"
+              value="Pendiente"
+              readonly
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Fecha de Solicitud</label>
+            <input
+              type="date"
+              [(ngModel)]="solicitudFormModel.fechaSolicitud"
+              name="fechaSolicitud"
+              [ngModelOptions]="{ standalone: true }"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Período Académico *</label>
+            <input
+              type="number"
+              [(ngModel)]="solicitudFormModel.periodoAcademicoId"
+              name="periodoAcademicoId"
+              [ngModelOptions]="{ standalone: true }"
+              required
+              placeholder="ID del período académico"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Observaciones</label>
+            <textarea
+              [(ngModel)]="solicitudFormModel.observaciones"
+              name="observaciones"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Observaciones adicionales"
+            ></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-cancelar" (click)="closeModalHandler()">Cancelar</button>
+            <button type="submit" class="btn-solicitar" [disabled]="!solicitudForm.valid">Enviar Solicitud</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

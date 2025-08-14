@@ -1,0 +1,56 @@
+<!-- src/app/auditoria/auditoria.html -->
+<div class="auditoria-contenedor">
+  <h2 class="titulo-principal">Auditoría del Sistema</h2>
+  <!-- Mensaje de error si existe -->
+  <div *ngIf="error" class="alerta">{{ error }}</div>
+  <!-- Indicador de carga -->
+  <div *ngIf="loading" class="loading">
+    Cargando...
+  </div>
+  <!-- Buscador -->
+  <div class="search-container">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      (input)="onSearch()"
+      placeholder="Buscar por tabla afectada o acción..."
+      class="search-input" />
+  </div>
+  <!-- Botón para recargar -->
+  <button class="btn btn-primario mb-3" (click)="cargarAuditorias()" [disabled]="loading">
+    Recargar Lista
+  </button>
+  <!-- Tabla de auditorías -->
+  <table class="tabla" *ngIf="!loading && filteredAuditorias.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Tabla Afectada</th>
+        <th>Acción</th>
+        <th>Registro ID</th>
+        <th>Usuario ID</th>
+        <th>Fecha</th>
+        <th>Detalles</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let auditoria of filteredAuditorias">
+        <td>{{ auditoria.id }}</td>
+        <td>{{ auditoria.tablaAfectada }}</td>
+        <td>{{ auditoria.accion }}</td>
+        <td>{{ auditoria.registroId }}</td>
+        <td>{{ auditoria.usuarioId }}</td>
+        <td>{{ auditoria.fecha ? (auditoria.fecha | date:'dd/MM/yyyy HH:mm') : 'N/A' }}</td>
+        <td>{{ auditoria.detalles || 'N/A' }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- Mensaje si no hay auditorías -->
+  <p *ngIf="filteredAuditorias.length === 0 && !loading && !error" class="texto-centro">
+    No hay auditorías que coincidan con la búsqueda.
+  </p>
+  <!-- Mensaje si no hay auditorías en la base de datos -->
+  <p *ngIf="auditorias.length === 0 && !loading && !error" class="texto-centro">
+    No hay auditorías registradas en el sistema.
+  </p>
+</div>

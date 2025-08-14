@@ -1,42 +1,40 @@
+// src/app/estudiantes/estudiantes.component.ts
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-// Definición de la interfaz Estudiante
+// Interfaces necesarias
 interface Estudiante {
   id: number;
   nombre: string;
-  apellido: string;
-  edad: number;
-  correo: string;
-  estadoId?: number;
-  carreraId?: number;
-  estadoNombre?: string;
-  carreraNombre?: string;
+  apellidos: string | null;
+  email: string;
+  username: string;
+  password: string;
+  role: string;
+  estadoId?: number | null;
+  carreraId?: number | null;
 }
 
-// Definición de la interfaz Carrera
 interface Carrera {
   id: number;
   nombre: string;
 }
 
-// Definición de la interfaz Estado
 interface Estado {
   id: number;
   nombre: string;
 }
 
-// DTO para crear estudiante
 interface CreateEstudianteDto {
   nombre: string;
-  apellidos: string;
-  edad: number;
-  correo: string;
-  estadoId?: number;
-  carreraId?: number;
+  apellidos: string | null;
+  email: string;
+  role?: string;
+  estadoId?: number | null;
+  carreraId?: number | null;
 }
 
 @Component({
@@ -51,261 +49,267 @@ export class EstudiantesComponent implements OnInit {
   filteredEstudiantes: Estudiante[] = [];
   error: string = '';
   loading: boolean = false;
-  
+
+  totalEstudiantes: number = 0;
+  estudiantesActivos: number = 0;
+  administradores: number = 0;
+  edadPromedio: number = 0;
+
   newStudent: CreateEstudianteDto = {
     nombre: '',
     apellidos: '',
-    edad: 0,
-    correo: '',
-    estadoId: undefined,
-    carreraId: undefined
+    email: '',
+    role: 'estudiante',
+    estadoId: null,
+    carreraId: null
   };
-  
+
   searchTerm: string = '';
   filtroEstado: string = '';
   filtroCarrera: string = '';
-  
-  totalEstudiantes: number = 0;
-  activos: number = 0;
-  carreras: number = 0;
-  edadPromedio: number = 0;
-  
+  filtroRol: string = '';
+
   carrerasDisponibles: Carrera[] = [];
   estadosDisponibles: Estado[] = [];
+
+  showSuccessMessage: boolean = false;
+  credencialesEstudiante: { username: string, email: string, password: string } = {
+    username: '',
+    email: '',
+    password: ''
+  };
 
   constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit() {
-    this.cargarEstados();
-    this.cargarCarreras();
-    this.cargarEstudiantes();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.role !== 'admin') {
+        this.router.navigate(['/dashboard']);
+        return;
+      }
+    } catch {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    this.cargarDatosIniciales();
+  }
+
+  private cargarDatosIniciales() {
+    this.loading = true;
+    Promise.all([
+      this.cargarEstados(),
+      this.cargarCarreras(),
+      this.cargarEstudiantes()
+    ]).finally(() => this.loading = false);
   }
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    let headers = new HttpHeaders({
-      'Content-Type': 'application/json'
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
     });
-    
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-    
-    return headers;
   }
 
   cargarEstados() {
-    this.http.get<Estado[]>('http://localhost:3000/api-beca/Estado', { 
-      headers: this.getHeaders() 
-    }).subscribe({
-      next: (data) => {
-        this.estadosDisponibles = data;
-      },
-      error: (err) => {
-        console.error('Error al cargar estados:', err);
-      }
+    return new Promise<void>((resolve) => {
+      this.http.get<Estado[]>('http://localhost:3000/api-beca/estado', {
+        headers: this.getHeaders()
+      }).subscribe({
+        next: (data) => this.estadosDisponibles = data,
+        error: (err) => console.error('Error cargando estados:', err),
+        complete: () => resolve()
+      });
     });
   }
 
   cargarCarreras() {
-    this.http.get<Carrera[]>('http://localhost:3000/api-beca/Carrera', { 
-      headers: this.getHeaders() 
-    }).subscribe({
-      next: (data) => {
-        this.carrerasDisponibles = data;
-      },
-      error: (err) => {
-        console.error('Error al cargar carreras:', err);
-      }
+    return new Promise<void>((resolve) => {
+      this.http.get<Carrera[]>('http://localhost:3000/api-beca/carrera', {
+        headers: this.getHeaders()
+      }).subscribe({
+        next: (data) => this.carrerasDisponibles = data,
+        error: (err) => console.error('Error cargando carreras:', err),
+        complete: () => resolve()
+      });
     });
   }
 
   cargarEstudiantes() {
-    this.loading = true;
-    this.error = '';
-    
-    this.http.get<Estudiante[]>('http://localhost:3000/api-beca/estudiantes', { 
-      headers: this.getHeaders() 
-    }).subscribe({
-      next: (data) => {
-        this.loading = false;
-        this.estudiantes = data;
-        this.filteredEstudiantes = [...this.estudiantes];
-        this.calcularKPIs();
-        this.filtrarEstudiantes();
-      },
-      error: (err) => {
-        this.error = 'Error al cargar estudiantes';
-        this.loading = false;
-        console.error(err);
-      }
+    return new Promise<void>((resolve) => {
+      this.http.get<Estudiante[]>('http://localhost:3000/api-beca/users', {
+        headers: this.getHeaders()
+      }).subscribe({
+        next: (data) => {
+          this.estudiantes = data;
+          this.filteredEstudiantes = [...data];
+          this.calcularKPIs();
+        },
+        error: (err) => this.error = 'Error cargando estudiantes: ' + err.message,
+        complete: () => resolve()
+      });
     });
   }
 
   calcularKPIs() {
     this.totalEstudiantes = this.estudiantes.length;
-    
-    // Estudiantes activos (suponiendo que estadoId=1 significa activo)
-    this.activos = this.estudiantes.filter(e => e.estadoId === 1).length;
-    
-    // Carreras representadas
-    const carrerasUnicas = new Set(this.estudiantes
-      .filter(e => e.carreraId)
-      .map(e => e.carreraId)
-    );
-    this.carreras = carrerasUnicas.size;
-    
-    // Edad promedio
-    if (this.estudiantes.length > 0) {
-      const sumaEdades = this.estudiantes.reduce((sum, e) => sum + (e.edad || 0), 0);
-      this.edadPromedio = Math.round(sumaEdades / this.estudiantes.length);
-    } else {
-      this.edadPromedio = 0;
+    this.estudiantesActivos = this.estudiantes.filter(e => e.estadoId === 1).length;
+    this.administradores = this.estudiantes.filter(e => e.role === 'admin').length;
+    this.edadPromedio = 0; // Ajusta según tus datos
+  }
+
+  private validarEstudiante(): boolean {
+    if (!this.newStudent.nombre?.trim()) {
+      this.error = 'Nombre es requerido';
+      return false;
     }
+    if (!this.newStudent.apellidos?.trim()) {
+      this.error = 'Apellidos son requeridos';
+      return false;
+    }
+    if (!this.newStudent.email?.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      this.error = 'Correo inválido';
+      return false;
+    }
+    return true;
   }
 
-  // Método para obtener el nombre de la carrera por ID
-  getCarreraNombre(carreraId: number | undefined): string {
-    if (!carreraId) return '-';
-    const carrera = this.carrerasDisponibles.find(c => c.id === carreraId);
-    return carrera ? carrera.nombre : '-';
+  private generarUsername(): string {
+    const baseUsername = this.newStudent.nombre.toLowerCase().replace(/\s+/g, '') +
+                        (this.newStudent.apellidos || '').toLowerCase().replace(/\s+/g, '');
+    return baseUsername + Math.floor(Math.random() * 1000);
   }
 
-  // Método para obtener el nombre del estado por ID
-  getEstadoNombre(estadoId: number | undefined): string {
-    if (!estadoId) return '-';
-    const estado = this.estadosDisponibles.find(e => e.id === estadoId);
-    return estado ? estado.nombre : '-';
+  private generarPasswordAleatoria(length = 8): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let pass = '';
+    for (let i = 0; i < length; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return pass;
   }
 
   onSubmitNewStudent() {
-    // Validaciones
-    if (!this.newStudent.nombre?.trim()) {
-      this.error = 'El nombre es requerido';
-      return;
-    }
-    
-    if (!this.newStudent.apellidos?.trim()) {
-      this.error = 'Los apellidos son requeridos';
-      return;
-    }
-    
-    if (!this.newStudent.edad || this.newStudent.edad < 16 || this.newStudent.edad > 100) {
-      this.error = 'La edad debe ser válida (entre 16 y 100 años)';
-      return;
-    }
-    
-    if (!this.newStudent.correo?.trim()) {
-      this.error = 'El correo es requerido';
-      return;
-    }
-    
-    // Validar formato de correo
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(this.newStudent.correo)) {
-      this.error = 'Formato de correo inválido';
-      return;
-    }
+    this.error = '';
+    this.showSuccessMessage = false;
+
+    if (!this.validarEstudiante()) return;
 
     this.loading = true;
-    this.error = '';
-    
-    this.http.post<Estudiante>('http://localhost:3000/api-beca/estudiantes/add', this.newStudent, {
+    console.log('Enviando datos al servidor:', this.newStudent);
+
+    // Generar username y password automáticamente
+    const generatedUsername = this.generarUsername();
+    const generatedPassword = this.generarPasswordAleatoria();
+
+    // Agregar username y password al objeto enviado
+    const studentData = {
+      ...this.newStudent,
+      username: generatedUsername,
+      password: generatedPassword
+    };
+
+    this.http.post<Estudiante>('http://localhost:3000/api-beca/users', studentData, {
       headers: this.getHeaders()
     }).subscribe({
       next: (response) => {
-        this.loading = false;
-        // Resetear formulario
-        this.newStudent = {
-          nombre: '',
-          apellidos: '',
-          edad: 0,
-          correo: '',
-          estadoId: undefined,
-          carreraId: undefined
+        console.log('Respuesta del servidor:', response);
+        
+        // Usar las credenciales generadas
+        this.credencialesEstudiante = {
+          username: generatedUsername,
+          email: this.newStudent.email,
+          password: generatedPassword
         };
-        // Recargar lista
+        console.log('Credenciales guardadas:', this.credencialesEstudiante);
+        
+        this.showSuccessMessage = true;
+        
+        this.resetFormulario();
         this.cargarEstudiantes();
-        alert('Estudiante creado correctamente');
       },
       error: (err) => {
-        this.error = 'Error al añadir estudiante';
+        console.error('Error en la solicitud:', err);
+        this.error = 'Error creando estudiante: ' + (err.error?.message || err.message);
         this.loading = false;
-        console.error(err);
+      },
+      complete: () => {
+        this.loading = false;
+        console.log('Solicitud completada');
       }
     });
   }
 
-  onCancel() {
+  filtrarEstudiantes() {
+    let filtered = [...this.estudiantes];
+    const term = this.searchTerm.toLowerCase();
+
+    if (term) {
+      filtered = filtered.filter(e =>
+        e.nombre.toLowerCase().includes(term) ||
+        (e.apellidos?.toLowerCase() ?? '').includes(term) || // Manejo de null/undefined
+        e.email.toLowerCase().includes(term)
+      );
+    }
+
+    if (this.filtroEstado) {
+      filtered = filtered.filter(e => e.estadoId?.toString() === this.filtroEstado);
+    }
+
+    if (this.filtroCarrera) {
+      filtered = filtered.filter(e => e.carreraId?.toString() === this.filtroCarrera);
+    }
+
+    if (this.filtroRol) {
+      filtered = filtered.filter(e => e.role === this.filtroRol);
+    }
+
+    this.filteredEstudiantes = filtered;
+  }
+
+  deleteEstudiante(id: number) {
+    if (!confirm('¿Eliminar este estudiante?')) return;
+
+    this.loading = true;
+
+    this.http.delete(`http://localhost:3000/api-becausers/${id}`, {
+      headers: this.getHeaders()
+    }).subscribe({
+      next: () => this.cargarEstudiantes(),
+      error: (err) => this.error = 'Error eliminando estudiante: ' + err.message,
+      complete: () => this.loading = false
+    });
+  }
+
+  resetFormulario() {
     this.newStudent = {
       nombre: '',
       apellidos: '',
-      edad: 0,
-      correo: '',
-      estadoId: undefined,
-      carreraId: undefined
+      email: '',
+      role: 'estudiante',
+      estadoId: null,
+      carreraId: null
     };
     this.error = '';
   }
 
-  filtrarEstudiantes() {
-    let filtered = [...this.estudiantes];
-    
-    // Filtrar por búsqueda
-    if (this.searchTerm.trim()) {
-      const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(estudiante => 
-        estudiante.nombre.toLowerCase().includes(term) ||
-        estudiante.apellido.toLowerCase().includes(term) ||
-        estudiante.correo.toLowerCase().includes(term) ||
-        (estudiante.carreraNombre?.toLowerCase().includes(term)) ||
-        (estudiante.estadoNombre?.toLowerCase().includes(term))
-      );
-    }
-    
-    // Filtrar por estado
-    if (this.filtroEstado) {
-      filtered = filtered.filter(estudiante => 
-        estudiante.estadoId?.toString() === this.filtroEstado
-      );
-    }
-    
-    // Filtrar por carrera
-    if (this.filtroCarrera) {
-      filtered = filtered.filter(estudiante => 
-        estudiante.carreraId?.toString() === this.filtroCarrera
-      );
-    }
-    
-    this.filteredEstudiantes = filtered;
+  getEstadoNombre(id?: number | null): string {
+    if (!id) return '-';
+    const estado = this.estadosDisponibles.find(e => e.id === id);
+    return estado ? estado.nombre : '-';
   }
 
-  onSearch() {
-    this.filtrarEstudiantes();
-  }
-
-  onFilterChange() {
-    this.filtrarEstudiantes();
-  }
-
-  deleteEstudiante(id: number) {
-    if (confirm('¿Estás seguro de eliminar este estudiante?')) {
-      this.loading = true;
-      
-      this.http.delete(`http://localhost:3000/api-beca/estudiantes/${id}`, {
-        headers: this.getHeaders()
-      }).subscribe({
-        next: () => {
-          this.loading = false;
-          this.cargarEstudiantes();
-          alert('Estudiante eliminado correctamente');
-        },
-        error: (err) => {
-          this.loading = false;
-          this.error = 'Error al eliminar estudiante';
-          console.error(err);
-        }
-      });
-    }
+  getCarreraNombre(id?: number | null): string {
+    if (!id) return '-';
+    const carrera = this.carrerasDisponibles.find(c => c.id === id);
+    return carrera ? carrera.nombre : '-';
   }
 }

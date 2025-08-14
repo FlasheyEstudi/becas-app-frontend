@@ -1,5 +1,6 @@
+// Guardia de autenticación para proteger rutas
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { CanActivate, Router, ActivatedRouteSnapshot } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -7,28 +8,39 @@ import { CanActivate, Router } from '@angular/router';
 export class AuthGuard implements CanActivate {
   constructor(private router: Router) {}
 
-  private isTokenExpired(token: string): boolean {
+  // Método para decodificar el token JWT
+  private decodeToken(token: string): any | null {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const exp = payload.exp * 1000; // Convertir a milisegundos
-      return Date.now() >= exp; // Comparar con la fecha actual
-    } catch (e) {
-      console.error('Error decodificando token:', e);
-      return true; // Si falla, considerarlo expirado
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch {
+      return null;
     }
   }
 
-  canActivate(): boolean {
+  // Método para verificar si el usuario está autenticado
+  canActivate(route: ActivatedRouteSnapshot): boolean {
     const token = localStorage.getItem('token');
-    console.log('Token en guard:', token);
-
-    if (token && !this.isTokenExpired(token)) {
-      return true;
-    } else {
-      console.log('Token inválido o expirado, redirigiendo a /login');
-      localStorage.removeItem('token'); // Eliminar token inválido
+    if (!token) {
       this.router.navigate(['/login']);
       return false;
     }
+    const decoded = this.decodeToken(token);
+    if (!decoded) {
+      localStorage.removeItem('token');
+      this.router.navigate(['/login']);
+      return false;
+    }
+    const now = Date.now() / 1000;
+    if (decoded.exp < now) {
+      localStorage.removeItem('token');
+      this.router.navigate(['/login']);
+      return false;
+    }
+    return true;
   }
 }

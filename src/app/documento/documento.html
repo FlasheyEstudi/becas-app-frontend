@@ -1,0 +1,81 @@
+<!-- src/app/documento/documento.html -->
+<div class="documento-contenedor">
+    <h2 class="titulo-principal">Documentos</h2>
+    <!-- Mensaje de error si existe -->
+    <div *ngIf="error" class="alerta">{{ error }}</div>
+    <!-- Indicador de carga -->
+    <div *ngIf="loading" class="loading">
+        Cargando...
+    </div>
+    <!-- Buscador -->
+    <div class="search-container">
+        <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()" placeholder="Buscar por nombre o URL..."
+            class="search-input" />
+    </div>
+    <!-- Formulario para añadir documento -->
+    <div class="form-container">
+        <h3 class="subtitulo">Añadir Nuevo Documento</h3>
+        <form (ngSubmit)="onSubmitNewDocumento()" #documentoForm="ngForm">
+            <div class="form-group">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" [(ngModel)]="newDocumento.nombre"
+                    placeholder="Nombre del documento" required />
+            </div>
+            <div class="form-group">
+                <label for="url">URL:</label>
+                <input type="text" id="url" name="url" [(ngModel)]="newDocumento.url" placeholder="URL del documento"
+                    required />
+            </div>
+            <div class="form-group">
+                <label for="estudianteId">ID Estudiante:</label>
+                <input type="number" id="estudianteId" name="estudianteId" [(ngModel)]="newDocumento.estudianteId"
+                    placeholder="ID del estudiante" required min="1" />
+            </div>
+            <div class="form-actions">
+                <button type="submit" [disabled]="loading" class="btn-primario">
+                    Añadir Documento
+                </button>
+                <button type="button" (click)="onCancel()" class="btn-secundario">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+    <!-- Botón para recargar -->
+    <button class="btn btn-primario mb-3" (click)="cargarDocumentos()" [disabled]="loading">
+        Recargar Lista
+    </button>
+    <!-- Tabla de documentos -->
+    <table class="tabla" *ngIf="!loading && filteredDocumentos.length > 0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>URL</th>
+                <th>Estudiante ID</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let documento of filteredDocumentos">
+                <td>{{ documento.id }}</td>
+                <td>{{ documento.nombre }}</td>
+                <td>{{ documento.url }}</td>
+                <td>{{ documento.estudianteId }}</td>
+                <td>
+                    <button (click)="deleteDocumento(documento.id)" class="btn-danger btn-sm">
+                        Eliminar
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <!-- Mensaje si no hay documentos -->
+    <p *ngIf="filteredDocumentos.length === 0 && !loading && !error" class="texto-centro">
+        No hay documentos que coincidan con la búsqueda.
+    </p>
+    <!-- Mensaje si no hay documentos en la base de datos -->
+    <p *ngIf="documentos.length === 0 && !loading && !error" class="texto-centro">
+        No hay documentos registrados en el sistema.
+    </p>
+</div>

@@ -1,0 +1,113 @@
+<!-- src/app/criterio-evaluacion/criterio-evaluacion.html -->
+<div class="criterio-evaluacion-contenedor">
+  <h2 class="titulo-principal">Criterios de Evaluación</h2>
+  <!-- Mensaje de error si existe -->
+  <div *ngIf="error" class="alerta">{{ error }}</div>
+  <!-- Indicador de carga -->
+  <div *ngIf="loading" class="loading">
+    Cargando...
+  </div>
+  <!-- Buscador -->
+  <div class="search-container">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      (input)="onSearch()"
+      placeholder="Buscar por nombre o descripción..."
+      class="search-input" />
+  </div>
+  <!-- Formulario para añadir criterio de evaluación -->
+  <div class="form-container">
+    <h3 class="subtitulo">Añadir Nuevo Criterio de Evaluación</h3>
+    <form (ngSubmit)="onSubmitNewCriterio()" #criterioForm="ngForm">
+      <div class="form-group">
+        <label for="nombre">Nombre:</label>
+        <input
+          type="text"
+          id="nombre"
+          name="nombre"
+          [(ngModel)]="newCriterio.nombre"
+          placeholder="Nombre del criterio"
+          required />
+      </div>
+      <div class="form-group">
+        <label for="descripcion">Descripción:</label>
+        <textarea
+          id="descripcion"
+          name="descripcion"
+          [(ngModel)]="newCriterio.descripcion"
+          placeholder="Descripción del criterio"
+          class="form-textarea"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="peso">Peso (%):</label>
+        <input
+          type="number"
+          id="peso"
+          name="peso"
+          [(ngModel)]="newCriterio.peso"
+          placeholder="Peso del criterio (0-100)"
+          required
+          min="0"
+          max="100" />
+      </div>
+      <div class="form-group">
+        <label for="tipoBecaId">ID Tipo Beca (Opcional):</label>
+        <input
+          type="number"
+          id="tipoBecaId"
+          name="tipoBecaId"
+          [(ngModel)]="newCriterio.tipoBecaId"
+          placeholder="ID del tipo de beca"
+          min="0" />
+      </div>
+      <div class="form-actions">
+        <button type="submit" [disabled]="loading" class="btn-primario">
+          Añadir Criterio
+        </button>
+        <button type="button" (click)="onCancel()" class="btn-secundario">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+  <!-- Botón para recargar -->
+  <button class="btn btn-primario mb-3" (click)="cargarCriterios()" [disabled]="loading">
+    Recargar Lista
+  </button>
+  <!-- Tabla de criterios de evaluación -->
+  <table class="tabla" *ngIf="!loading && filteredCriterios.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Peso (%)</th>
+        <th>Tipo Beca ID</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let criterio of filteredCriterios">
+        <td>{{ criterio.id }}</td>
+        <td>{{ criterio.nombre }}</td>
+        <td>{{ criterio.descripcion || 'N/A' }}</td>
+        <td>{{ criterio.peso }}%</td>
+        <td>{{ criterio.tipoBecaId || 'N/A' }}</td>
+        <td>
+          <button (click)="deleteCriterio(criterio.id)" class="btn-danger btn-sm">
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- Mensaje si no hay criterios -->
+  <p *ngIf="filteredCriterios.length === 0 && !loading && !error" class="texto-centro">
+    No hay criterios de evaluación que coincidan con la búsqueda.
+  </p>
+  <!-- Mensaje si no hay criterios en la base de datos -->
+  <p *ngIf="criterios.length === 0 && !loading && !error" class="texto-centro">
+    No hay criterios de evaluación registrados en el sistema.
+  </p>
+</div>

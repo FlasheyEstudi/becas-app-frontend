@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { SidebarComponent } from './sidebar/sidebar'; // ✅ ruta correcta
+import { SidebarComponent } from './sidebar/sidebar';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, SidebarComponent],
+  imports: [RouterOutlet, CommonModule, SidebarComponent, FormsModule],
   template: `
     <app-sidebar *ngIf="showSidebar"></app-sidebar>
     <main [class.with-sidebar]="showSidebar">

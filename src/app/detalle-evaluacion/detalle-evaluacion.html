@@ -1,0 +1,115 @@
+<!-- src/app/detalle-evaluacion/detalle-evaluacion.html -->
+<div class="detalle-evaluacion-contenedor">
+  <h2 class="titulo-principal">Detalles de Evaluación</h2>
+  <!-- Mensaje de error si existe -->
+  <div *ngIf="error" class="alerta">{{ error }}</div>
+  <!-- Indicador de carga -->
+  <div *ngIf="loading" class="loading">
+    Cargando...
+  </div>
+  <!-- Buscador -->
+  <div class="search-container">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      (input)="onSearch()"
+      placeholder="Buscar por ID de evaluación o criterio..."
+      class="search-input" />
+  </div>
+  <!-- Formulario para añadir detalle de evaluación -->
+  <div class="form-container">
+    <h3 class="subtitulo">Añadir Nuevo Detalle de Evaluación</h3>
+    <form (ngSubmit)="onSubmitNewDetalle()" #detalleForm="ngForm">
+      <div class="form-group">
+        <label for="evaluacionId">ID Evaluación:</label>
+        <input
+          type="number"
+          id="evaluacionId"
+          name="evaluacionId"
+          [(ngModel)]="newDetalle.evaluacionId"
+          placeholder="ID de la evaluación"
+          required
+          min="1" />
+      </div>
+      <div class="form-group">
+        <label for="criterioId">ID Criterio:</label>
+        <input
+          type="number"
+          id="criterioId"
+          name="criterioId"
+          [(ngModel)]="newDetalle.criterioId"
+          placeholder="ID del criterio"
+          required
+          min="1" />
+      </div>
+      <div class="form-group">
+        <label for="puntuacion">Puntuación:</label>
+        <input
+          type="number"
+          id="puntuacion"
+          name="puntuacion"
+          [(ngModel)]="newDetalle.puntuacion"
+          placeholder="Puntuación (0-100)"
+          required
+          min="0"
+          max="100" />
+      </div>
+      <div class="form-group">
+        <label for="comentarios">Comentarios:</label>
+        <textarea
+          id="comentarios"
+          name="comentarios"
+          [(ngModel)]="newDetalle.comentarios"
+          placeholder="Comentarios adicionales"
+          class="form-textarea"></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="submit" [disabled]="loading" class="btn-primario">
+          Añadir Detalle
+        </button>
+        <button type="button" (click)="onCancel()" class="btn-secundario">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+  <!-- Botón para recargar -->
+  <button class="btn btn-primario mb-3" (click)="cargarDetalles()" [disabled]="loading">
+    Recargar Lista
+  </button>
+  <!-- Tabla de detalles de evaluación -->
+  <table class="tabla" *ngIf="!loading && filteredDetalles.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Evaluación ID</th>
+        <th>Criterio ID</th>
+        <th>Puntuación</th>
+        <th>Comentarios</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let detalle of filteredDetalles">
+        <td>{{ detalle.id }}</td>
+        <td>{{ detalle.evaluacionId }}</td>
+        <td>{{ detalle.criterioId }}</td>
+        <td>{{ detalle.puntuacion }}</td>
+        <td>{{ detalle.comentarios || 'N/A' }}</td>
+        <td>
+          <button (click)="deleteDetalle(detalle.id)" class="btn-danger btn-sm">
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- Mensaje si no hay detalles -->
+  <p *ngIf="filteredDetalles.length === 0 && !loading && !error" class="texto-centro">
+    No hay detalles de evaluación que coincidan con la búsqueda.
+  </p>
+  <!-- Mensaje si no hay detalles en la base de datos -->
+  <p *ngIf="detalles.length === 0 && !loading && !error" class="texto-centro">
+    No hay detalles de evaluación registrados en el sistema.
+  </p>
+</div>

@@ -1,89 +1,79 @@
+// Componente para registro de usuarios
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { AuthService } from '../auth';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './register.html',
   styleUrls: ['./register.scss']
 })
 export class RegisterComponent {
-  username = '';
-  firstName = '';
-  lastName = '';
-  email = '';
-  role = 'estudiante';
-  password = '';
-  confirmPassword = '';
+  // Formulario reactivo para registro
+  registerForm: FormGroup;
+  // Opciones de roles
+  roles = [
+    { value: 'admin', label: 'Administrador' },
+    { value: 'estudiante', label: 'Estudiante' },
+    { value: 'profesor', label: 'Profesor' },
+    { value: 'secretario', label: 'Secretario' },
+    { value: 'rector', label: 'Rector' }
+  ];
+  // Indicador de carga
   loading = false;
+  // Mensaje de error
   error = '';
 
-  roles = [
-    { value: 'rector', label: 'Rector' },
-    { value: 'secretario', label: 'Secretario' },
-    { value: 'profesor', label: 'Profesor' },
-    { value: 'estudiante', label: 'Estudiante' }
-  ];
-
   constructor(
+    private fb: FormBuilder,
     private router: Router,
     private authService: AuthService
-  ) {}
+  ) {
+    // Inicializar formulario con validaciones
+    this.registerForm = this.fb.group({
+      username: ['', Validators.required],
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      role: ['estudiante', Validators.required],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', Validators.required]
+    });
+  }
 
+  // Método para manejar el envío del formulario de registro
   onSubmit() {
-    if (!this.username.trim()) {
-      this.error = 'El nombre de usuario es requerido';
+    if (this.registerForm.invalid) {
+      this.error = 'Por favor complete todos los campos correctamente';
       return;
     }
-    if (!this.firstName.trim()) {
-      this.error = 'El nombre es requerido';
-      return;
-    }
-    if (!this.lastName.trim()) {
-      this.error = 'El apellido es requerido';
-      return;
-    }
-    if (!this.email.trim()) {
-      this.error = 'El email es requerido';
-      return;
-    }
-    if (!this.password.trim()) {
-      this.error = 'La contraseña es requerida';
-      return;
-    }
-    if (this.password !== this.confirmPassword) {
+    const { password, confirmPassword } = this.registerForm.value;
+    if (password !== confirmPassword) {
       this.error = 'Las contraseñas no coinciden';
       return;
     }
-    if (this.password.length < 6) {
-      this.error = 'La contraseña debe tener al menos 6 caracteres';
-      return;
-    }
-
     this.loading = true;
     this.error = '';
-
     const userData = {
-      username: this.username,
-      password: this.password,
-      nombre: `${this.firstName} ${this.lastName}`,
-      email: this.email,
-      role: this.role
+      username: this.registerForm.value.username,
+      password: this.registerForm.value.password,
+      nombre: `${this.registerForm.value.firstName} ${this.registerForm.value.lastName}`,
+      email: this.registerForm.value.email,
+      role: this.registerForm.value.role
     };
-
     this.authService.register(userData).subscribe({
       next: () => {
         this.loading = false;
         alert('Usuario registrado exitosamente');
         this.router.navigate(['/login']);
       },
-      error: (error) => {
+      error: (err: any) => {
         this.loading = false;
-        this.error = error.error?.message || 'Error al registrar usuario';
+        this.error = err.error?.message || 'Error al registrar usuario';
       }
     });
   }

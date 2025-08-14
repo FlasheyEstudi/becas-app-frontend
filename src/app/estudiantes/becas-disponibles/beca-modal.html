@@ -1,0 +1,32 @@
+<div *ngIf="isOpen" class="modal-detalles modal-overlay" (click)="closeModalHandler()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Detalles de la Beca</h2>
+      <button class="close-btn" aria-label="Cerrar modal" (click)="closeModalHandler()">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="beca">
+      <div class="beca-info">
+        <h3>{{ beca.nombre }}</h3>
+        <p><strong>Descripción:</strong> {{ beca.descripcion }}</p>
+        <p><strong>Cobertura:</strong> {{ beca.cobertura }}%</p>
+        <p><strong>Fecha límite:</strong> {{ beca.fechaLimite }}</p>
+        <p><strong>Beneficiarios:</strong> {{ beca.beneficiarios }}</p>
+        <p><strong>Valor:</strong> {{ beca.valor }}</p>
+      </div>
+
+      <div class="requisitos" *ngIf="beca.requisitos?.length">
+        <h4>Requisitos principales:</h4>
+        <ul>
+          <li *ngFor="let requisito of beca.requisitos">{{ requisito }}</li>
+        </ul>
+      </div>
+
+      <div class="acciones-modal">
+        <button class="btn-cerrar" (click)="closeModalHandler()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>

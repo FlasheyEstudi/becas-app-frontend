@@ -1,10 +1,11 @@
+// Componente para gestionar estados
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-// Definición de la interfaz Estado
+// Interfaz para representar un estado
 interface Estado {
   id: number;
   nombre: string;
@@ -25,43 +26,47 @@ interface CreateEstadoDto {
   styleUrls: ['./estado.scss']
 })
 export class EstadoComponent implements OnInit {
+  // Array para almacenar los estados
   estados: Estado[] = [];
+  // Array para almacenar estados filtrados
   filteredEstados: Estado[] = [];
+  // Mensaje de error
   error: string = '';
+  // Indicador de carga
   loading: boolean = false;
-  
+  // Objeto para el nuevo estado
   newEstado: CreateEstadoDto = {
     nombre: '',
     fechaRegistro: new Date().toISOString().split('T')[0] // Fecha actual por defecto
   };
-  
+  // Término de búsqueda
   searchTerm: string = '';
 
   constructor(private http: HttpClient, private router: Router) {}
 
+  // Método que se ejecuta cuando se inicializa el componente
   ngOnInit() {
     this.cargarEstados();
   }
 
+  // Método privado para obtener los encabezados HTTP con token de autenticación
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     let headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
-    
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    
     return headers;
   }
 
+  // Método para cargar todos los estados desde el backend
   cargarEstados() {
     this.loading = true;
     this.error = '';
-    
-    this.http.get<Estado[]>('http://localhost:3000/api-beca/Estado', { 
-      headers: this.getHeaders() 
+    this.http.get<Estado[]>('http://localhost:3000/api-beca/Estado', {
+      headers: this.getHeaders()
     }).subscribe({
       next: (data) => {
         this.loading = false;
@@ -76,21 +81,19 @@ export class EstadoComponent implements OnInit {
     });
   }
 
+  // Método para manejar el envío del formulario de nuevo estado
   onSubmitNewEstado() {
     // Validaciones
     if (!this.newEstado.nombre?.trim()) {
       this.error = 'El nombre es requerido';
       return;
     }
-    
     if (!this.newEstado.fechaRegistro) {
       this.error = 'La fecha de registro es requerida';
       return;
     }
-
     this.loading = true;
     this.error = '';
-    
     this.http.post<Estado>('http://localhost:3000/api-beca/Estado/add', this.newEstado, {
       headers: this.getHeaders()
     }).subscribe({
@@ -113,6 +116,7 @@ export class EstadoComponent implements OnInit {
     });
   }
 
+  // Método para cancelar la creación de nuevo estado
   onCancel() {
     this.newEstado = {
       nombre: '',
@@ -121,22 +125,22 @@ export class EstadoComponent implements OnInit {
     this.error = '';
   }
 
+  // Método para filtrar estados según término de búsqueda
   onSearch() {
     if (!this.searchTerm.trim()) {
       this.filteredEstados = [...this.estados];
       return;
     }
-
     const term = this.searchTerm.toLowerCase();
-    this.filteredEstados = this.estados.filter(estado => 
+    this.filteredEstados = this.estados.filter(estado =>
       estado.nombre.toLowerCase().includes(term)
     );
   }
 
+  // Método para eliminar un estado
   deleteEstado(id: number) {
     if (confirm('¿Estás seguro de eliminar este estado?')) {
       this.loading = true;
-      
       this.http.delete(`http://localhost:3000/api-beca/Estado/${id}`, {
         headers: this.getHeaders()
       }).subscribe({

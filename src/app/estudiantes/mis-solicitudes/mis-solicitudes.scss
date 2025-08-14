@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+.mis-solicitudes-container {
+  margin-left: 260px;
+  padding: 2rem;
+  background: var(--body-bg);
+  color: var(--text-color);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--text-color);
+  }
+
+  .loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    color: var(--text-color);
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid var(--btn-primary-bg);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  }
+
+  .error {
+    color: #e74c3c;
+    background: #fdeaea;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .tabla-solicitudes {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    th {
+      background: var(--card-bg);
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    td {
+      color: var(--text-color);
+    }
+
+    tr:hover {
+      background: rgba(255, 255, 255, 0.05);
+      transition: background 0.3s ease;
+    }
+
+    .estado {
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .pendiente { background-color: #ffeb3b; color: #000; }
+    .aprobado { background-color: #4caf50; color: #fff; }
+    .rechazado { background-color: #f44336; color: #fff; }
+    .activo { color: green; font-weight: bold; }
+    .inactivo { color: red; font-weight: bold; }
+  }
+
+  p {
+    text-align: center;
+    padding: 2rem;
+    color: rgba(var(--text-color-rgb), 0.7);
+    font-size: 1rem;
+  }
+}

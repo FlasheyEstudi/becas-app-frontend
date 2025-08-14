@@ -16,7 +16,7 @@
   <!-- Formulario para añadir solicitud de beca -->
   <div class="form-container">
     <h3 class="subtitulo">Añadir Nueva Solicitud de Beca</h3>
-    <form (ngSubmit)="onSubmitNewSolicitud()" #solicitudForm="ngForm">
+    <form (ngSubmit)="onSubmitNewSolicitud(solicitudForm)" #solicitudForm="ngForm">
       <div class="form-group">
         <label for="estudianteId">ID Estudiante:</label>
         <input type="number" id="estudianteId" name="estudianteId" [(ngModel)]="newSolicitud.estudianteId"
@@ -62,7 +62,7 @@
         <button type="submit" [disabled]="loading" class="btn-primario">
           Añadir Solicitud
         </button>
-        <button type="button" (click)="onCancel()" class="btn-secundario">
+        <button type="button" (click)="onCancel(solicitudForm)" class="btn-secundario">
           Cancelar
         </button>
       </div>

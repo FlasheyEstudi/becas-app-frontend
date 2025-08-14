@@ -1,0 +1,54 @@
+<div class="mis-solicitudes-container">
+  <h2>Mis Solicitudes de Beca</h2>
+
+  <div *ngIf="loading" class="loading">Cargando solicitudes...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <table *ngIf="!loading && solicitudes.length > 0" class="tabla-solicitudes">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Estudiante</th>
+        <th>Tipo de Beca</th>
+        <th>Fecha Solicitud</th>
+        <th>Estado de Solicitud</th>
+        <th>Estado del Estudiante</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let solicitud of solicitudes; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ solicitud.estudiante.nombreCompleto || 'Desconocido' }}</td>
+        <td>{{ solicitud.tipoBeca.nombre || 'Sin nombre' }}</td>
+        <td>{{ solicitud.fechaSolicitud | date:'dd/MM/yyyy' }}</td>
+        <td>
+          <span class="estado" [ngClass]="solicitud.estado.nombre.toLowerCase()">
+            {{ solicitud.estado.nombre || 'Sin estado' }}
+          </span>
+        </td>
+        <td>
+          <span [ngClass]="{
+              'activo': solicitud.estudiante.estado.nombre.toLowerCase() === 'activo',
+              'inactivo': solicitud.estudiante.estado.nombre.toLowerCase() !== 'activo'
+            }">
+            {{ solicitud.estudiante.estado.nombre || 'Desconocido' }}
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="!loading && solicitudes.length === 0">No has realizado ninguna solicitud.</p>
+</div>
+
+<style>
+  .estado {
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .pendiente { background-color: #ffeb3b; color: #000; }
+  .aprobado { background-color: #4caf50; color: #fff; }
+  .rechazado { background-color: #f44336; color: #fff; }
+  .activo { color: green; font-weight: bold; }
+  .inactivo { color: red; font-weight: bold; }
+</style>

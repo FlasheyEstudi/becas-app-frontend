@@ -1,0 +1,100 @@
+<!-- src/app/notificacion/notificacion.html -->
+<div class="notificacion-contenedor">
+  <h2 class="titulo-principal">Notificaciones</h2>
+  <!-- Mensaje de error si existe -->
+  <div *ngIf="error" class="alerta">{{ error }}</div>
+  <!-- Indicador de carga -->
+  <div *ngIf="loading" class="loading">
+    Cargando...
+  </div>
+  <!-- Buscador -->
+  <div class="search-container">
+    <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()" placeholder="Buscar por título o mensaje..."
+      class="search-input" />
+  </div>
+  <!-- Formulario para añadir notificación -->
+  <div class="form-container">
+    <h3 class="subtitulo">Añadir Nueva Notificación</h3>
+    <form (ngSubmit)="onSubmitNewNotificacion()" #notificacionForm="ngForm">
+      <div class="form-group">
+        <label for="usuarioId">ID Usuario:</label>
+        <input type="number" id="usuarioId" name="usuarioId" [(ngModel)]="newNotificacion.usuarioId"
+          placeholder="ID del usuario" required min="1" />
+      </div>
+      <div class="form-group">
+        <label for="titulo">Título:</label>
+        <input type="text" id="titulo" name="titulo" [(ngModel)]="newNotificacion.titulo"
+          placeholder="Título de la notificación" required />
+      </div>
+      <div class="form-group">
+        <label for="mensaje">Mensaje:</label>
+        <textarea id="mensaje" name="mensaje" [(ngModel)]="newNotificacion.mensaje"
+          placeholder="Mensaje de la notificación" class="form-textarea" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="tipo">Tipo:</label>
+        <select id="tipo" name="tipo" [(ngModel)]="newNotificacion.tipo">
+          <option value="sistema">Sistema</option>
+          <option value="solicitud">Solicitud</option>
+          <option value="documento">Documento</option>
+          <option value="evaluacion">Evaluación</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="link">Enlace (Opcional):</label>
+        <input type="text" id="link" name="link" [(ngModel)]="newNotificacion.link" placeholder="Enlace opcional" />
+      </div>
+      <div class="form-actions">
+        <button type="submit" [disabled]="loading" class="btn-primario">
+          Añadir Notificación
+        </button>
+        <button type="button" (click)="onCancel()" class="btn-secundario">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+  <!-- Botón para recargar -->
+  <button class="btn btn-primario mb-3" (click)="cargarNotificaciones()" [disabled]="loading">
+    Recargar Lista
+  </button>
+  <!-- Tabla de notificaciones -->
+  <table class="tabla" *ngIf="!loading && filteredNotificaciones.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Usuario ID</th>
+        <th>Título</th>
+        <th>Mensaje</th>
+        <th>Tipo</th>
+        <th>Leída</th>
+        <th>Fecha</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let notificacion of filteredNotificaciones">
+        <td>{{ notificacion.id }}</td>
+        <td>{{ notificacion.usuarioId }}</td>
+        <td>{{ notificacion.titulo }}</td>
+        <td>{{ notificacion.mensaje }}</td>
+        <td>{{ notificacion.tipo }}</td>
+        <td>{{ notificacion.leida ? 'Sí' : 'No' }}</td>
+        <td>{{ notificacion.fecha ? (notificacion.fecha | date:'dd/MM/yyyy') : 'N/A' }}</td>
+        <td>
+          <button (click)="deleteNotificacion(notificacion.id)" class="btn-danger btn-sm">
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- Mensaje si no hay notificaciones -->
+  <p *ngIf="filteredNotificaciones.length === 0 && !loading && !error" class="texto-centro">
+    No hay notificaciones que coincidan con la búsqueda.
+  </p>
+  <!-- Mensaje si no hay notificaciones en la base de datos -->
+  <p *ngIf="notificaciones.length === 0 && !loading && !error" class="texto-centro">
+    No hay notificaciones registradas en el sistema.
+  </p>
+</div>

@@ -1,203 +1,221 @@
-// src/app/dashboard/dashboard.component.ts
 import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Chart } from 'chart.js/auto';
+
+interface KpiCard {
+  label: string;
+  value: number;
+  delta: number;
+  deltaType: string;
+  icon: string;
+}
+
+interface SolicitudBeca {
+  id: number;
+  estudianteId: number;
+  estudiante?: { nombre: string; apellido: string };
+  tipoBecaId: number;
+  tipoBeca?: { nombre: string };
+  estadoId: number;
+  estado?: { nombre: string };
+  fechaSolicitud: string;
+  periodoAcademicoId: number;
+  periodoAcademico?: { nombre: string };
+  observaciones: string | null;
+  fechaResultado: string | null;
+}
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss']
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
-  userRole: string = '';
-  userName: string = '';
-
-  // 🔢 KPIs
-  kpis = [
+  kpis: KpiCard[] = [
     { label: 'Estudiantes Registrados', value: 0, delta: 0, deltaType: 'up', icon: '👥' },
     { label: 'Becas Disponibles', value: 0, delta: 0, deltaType: 'up', icon: '📚' },
     { label: 'Solicitudes Pendientes', value: 0, delta: 0, deltaType: 'down', icon: '⏳' },
     { label: 'Solicitudes Aprobadas', value: 0, delta: 0, deltaType: 'up', icon: '✅' }
   ];
 
-  // 📈 Datos para gráficos
   monthlyTrend: number[] = [];
   statusDistribution: number[] = [];
-  
-  // 📋 Solicitudes pendientes
   pendingRequests: any[] = [];
+  loading: boolean = false;
+  error: string = '';
 
-  constructor(private router: Router) {
-    this.loadUserInfo();
-  }
+  private baseUrl = 'http://localhost:3000/api-beca/solicitudes-beca';
+  private kpiBaseUrl = 'http://localhost:3000/api-beca';
+
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
-    this.cargarDatosReales();
+    this.cargarDatosDashboard();
   }
 
-  ngAfterViewInit(): void {
-    // Los gráficos se renderizan después de cargar los datos
-  }
+  ngAfterViewInit(): void {}
 
-  loadUserInfo() {
+  private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const payload = token.split('.')[1];
-        const decoded = JSON.parse(atob(payload));
-        this.userName = decoded.username || 'Usuario';
-        this.userRole = decoded.role || 'Estudiante';
-      } catch {
-        this.userName = 'Usuario';
-        this.userRole = 'Estudiante';
-      }
-    } else {
-      this.router.navigate(['/login']);
-    }
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    });
   }
 
-  async cargarDatosReales() {
+  async cargarDatosDashboard(): Promise<void> {
+    this.loading = true;
+    this.error = '';
+
     try {
-      // Cargar datos reales desde el backend
-      await this.cargarKPIs();
-      await this.cargarGraficos();
-      await this.cargarSolicitudesPendientes();
-      
-      // Renderizar gráficos después de cargar los datos
-      setTimeout(() => {
-        this.renderCharts();
-      }, 100);
-      
+      await Promise.all([
+        this.cargarDatosKPIs(),
+        this.cargarDatosGraficos(),
+        this.cargarSolicitudesRecientes()
+      ]);
+      this.renderizarGraficos();
     } catch (error) {
-      console.error('Error al cargar datos del dashboard:', error);
+      this.handleError('Error al cargar datos del dashboard', error);
+    } finally {
+      this.loading = false;
     }
   }
 
-  async cargarKPIs() {
-    // Simulación de llamadas reales al backend
-    // Reemplazar con llamadas HTTP reales
-    
-    // Ejemplo de llamadas reales:
-    // const estudiantesResponse = await fetch('http://localhost:3000/api-beca/estudiantes/count');
-    // const becasResponse = await fetch('http://localhost:3000/api-beca/tipo-beca/count');
-    // const solicitudesPendientesResponse = await fetch('http://localhost:3000/api-beca/solicitudes/pendientes/count');
-    // const solicitudesAprobadasResponse = await fetch('http://localhost:3000/api-beca/solicitudes/aprobadas/count');
-    
-    // this.kpis[0].value = await estudiantesResponse.json().count;
-    // this.kpis[1].value = await becasResponse.json().count;
-    // this.kpis[2].value = await solicitudesPendientesResponse.json().count;
-    // this.kpis[3].value = await solicitudesAprobadasResponse.json().count;
-    
-    // Datos simulados hasta implementar las llamadas reales
-    this.kpis[0].value = 1247;
-    this.kpis[0].delta = 52;
-    
-    this.kpis[1].value = 15;
-    this.kpis[1].delta = 3;
-    
-    this.kpis[2].value = 89;
-    this.kpis[2].delta = -12;
-    
-    this.kpis[3].value = 324;
-    this.kpis[3].delta = 28;
+  async cargarDatosKPIs(): Promise<void> {
+    try {
+      const headers = this.getHeaders();
+      const [estudiantes, becas, pendientes, aprobadas] = await Promise.all([
+        this.http.get<{count: number}>(`${this.kpiBaseUrl}/estudiantes/count`, { headers }).toPromise().catch(() => ({count: 0})),
+        this.http.get<{count: number}>(`${this.kpiBaseUrl}/tipo-beca/count`, { headers }).toPromise().catch(() => ({count: 0})),
+        this.http.get<{count: number}>(`${this.baseUrl}/count?estadoId=1`, { headers }).toPromise().catch(() => ({count: 0})),
+        this.http.get<{count: number}>(`${this.baseUrl}/count?estadoId=2`, { headers }).toPromise().catch(() => ({count: 0}))
+      ]);
+      this.actualizarKPIs(estudiantes?.count || 0, becas?.count || 0, pendientes?.count || 0, aprobadas?.count || 0);
+    } catch (error) {
+      this.handleError('Error al cargar KPIs', error);
+    }
   }
 
-  async cargarGraficos() {
-    // Simulación de llamadas reales al backend
-    // Reemplazar con llamadas HTTP reales
-    
-    // Ejemplo de llamadas reales:
-    // const tendenciaResponse = await fetch('http://localhost:3000/api-beca/solicitudes/tendencia');
-    // const estadosResponse = await fetch('http://localhost:3000/api-beca/solicitudes/estados');
-    
-    // this.monthlyTrend = await tendenciaResponse.json().data;
-    // this.statusDistribution = await estadosResponse.json().data;
-    
-    // Datos simulados hasta implementar las llamadas reales
-    this.monthlyTrend = [280, 210, 250, 290, 300, 320];
-    this.statusDistribution = [220, 110, 55, 45]; // Aprobadas, Pendientes, En revisión, Rechazadas
+  private actualizarKPIs(estudiantes: number, becas: number, pendientes: number, aprobadas: number): void {
+    this.kpis[0].value = estudiantes;
+    this.kpis[1].value = becas;
+    this.kpis[2].value = pendientes;
+    this.kpis[3].value = aprobadas;
   }
 
-  async cargarSolicitudesPendientes() {
-    // Simulación de llamadas reales al backend
-    // Reemplazar con llamadas HTTP reales
-    
-    // Ejemplo de llamada real:
-    // const response = await fetch('http://localhost:3000/api-beca/solicitudes/pendientes?limit=5');
-    // this.pendingRequests = await response.json();
-    
-    // Datos simulados hasta implementar las llamadas reales
-    this.pendingRequests = [
-      { estudiante: 'María González', tipo: 'Académica', fecha: '09/08' },
-      { estudiante: 'Carlos López', tipo: 'Deportiva', fecha: '08/08' },
-      { estudiante: 'Ana Martínez', tipo: 'Transporte', fecha: '07/08' },
-      { estudiante: 'Luis Rodríguez', tipo: 'Académica', fecha: '06/08' },
-      { estudiante: 'Sofía Pérez', tipo: 'Deportiva', fecha: '05/08' }
-    ];
+  async cargarDatosGraficos(): Promise<void> {
+    try {
+      const headers = this.getHeaders();
+      const [tendencia, estados] = await Promise.all([
+        this.http.get<{data: number[]}>(`${this.baseUrl}/tendencia?months=6`, { headers }).toPromise().catch(() => ({data: [0, 0, 0, 0, 0, 0]})),
+        this.http.get<{data: number[]}>(`${this.baseUrl}/estadisticas/estados`, { headers }).toPromise().catch(() => ({data: [0, 0, 0, 0]}))
+      ]);
+      this.monthlyTrend = tendencia?.data || [0, 0, 0, 0, 0, 0];
+      this.statusDistribution = estados?.data || [0, 0, 0, 0];
+    } catch (error) {
+      this.handleError('Error al cargar datos para gráficos', error);
+    }
   }
 
-  renderCharts() {
-    // Limpiar gráficos existentes si ya existen
-    const existingTrendChart = Chart.getChart('trendChart');
-    const existingStatusChart = Chart.getChart('statusChart');
-    
-    if (existingTrendChart) {
-      existingTrendChart.destroy();
+  async cargarSolicitudesRecientes(): Promise<void> {
+    try {
+      const headers = this.getHeaders();
+      const response = await this.http.get<SolicitudBeca[]>(`${this.baseUrl}/pendientes?limit=5`, { headers }).toPromise().catch(() => []);
+      this.pendingRequests = (response || []).map(item => ({
+        id: item.id,
+        estudiante: (item.estudiante?.nombre ?? '') + ' ' + (item.estudiante?.apellido ?? '') || 'Desconocido',
+        tipo: item.tipoBeca?.nombre || 'Sin tipo',
+        fecha: item.fechaSolicitud 
+          ? new Date(item.fechaSolicitud).toLocaleDateString('es-ES', {day: '2-digit', month: '2-digit'})
+          : 'N/A'
+      }));
+    } catch (error) {
+      this.handleError('Error al cargar solicitudes recientes', error);
+    }
+  }
+
+  renderizarGraficos(): void {
+    // Destruir gráficos existentes
+    const trendChart = Chart.getChart('trendChart');
+    if (trendChart) {
+      trendChart.destroy();
     }
     
-    if (existingStatusChart) {
-      existingStatusChart.destroy();
+    const statusChart = Chart.getChart('statusChart');
+    if (statusChart) {
+      statusChart.destroy();
     }
 
-    // Tendencia mensual
-    new Chart('trendChart', {
-      type: 'line',
-      data: {
-        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-        datasets: [{
-          label: 'Solicitudes',
-          data: this.monthlyTrend,
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true } }
-      }
-    });
+    if (document.getElementById('trendChart')) {
+      new Chart('trendChart', {
+        type: 'line',
+        data: {
+          labels: this.obtenerUltimosMeses(6),
+          datasets: [{
+            label: 'Solicitudes',
+            data: this.monthlyTrend,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
 
-    // Distribución de estados
-    new Chart('statusChart', {
-      type: 'doughnut',
-      data: {
-        labels: ['Aprobadas', 'Pendientes', 'En revisión', 'Rechazadas'],
-        datasets: [{
-          data: this.statusDistribution,
-          backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#ef4444']
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom' } }
-      }
-    });
+    if (document.getElementById('statusChart')) {
+      new Chart('statusChart', {
+        type: 'doughnut',
+        data: {
+          labels: ['Aprobadas', 'Pendientes', 'En revisión', 'Rechazadas'],
+          datasets: [{
+            data: this.statusDistribution,
+            backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#ef4444']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
   }
 
-  goTo(route: string) {
-    this.router.navigate([route]);
+  private obtenerUltimosMeses(cantidad: number): string[] {
+    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const fecha = new Date();
+    const resultado: string[] = [];
+    for (let i = cantidad - 1; i >= 0; i--) {
+      const d = new Date(fecha.getFullYear(), fecha.getMonth() - i, 1);
+      resultado.push(meses[d.getMonth()] + ' ' + d.getFullYear().toString().slice(2));
+    }
+    return resultado;
   }
 
-  logout() {
-    localStorage.removeItem('token');
-    this.router.navigate(['/login']);
+  private handleError(contexto: string, error: any): void {
+    console.error(`${contexto}:`, error);
+    this.error = `${contexto}. ${error.message || 'Verifique su conexión'}`;
+    if (error.status === 404) this.error += ' (Recurso no encontrado)';
+    else if (error.status === 401) this.error += ' (No autorizado)';
+  }
+
+  navegarASolicitudes(): void {
+    this.router.navigate(['/solicitud-beca']);
+  }
+
+  actualizarDashboard(): void {
+    this.cargarDatosDashboard();
   }
 }
