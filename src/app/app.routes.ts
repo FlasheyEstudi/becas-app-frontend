@@ -27,15 +27,16 @@ import { PerfilComponent } from './estudiantes/perfil/perfil';
 import { BecasDisponiblesComponent } from './estudiantes/becas-disponibles/becas-disponibles';
 import { MisSolicitudesComponent } from './estudiantes/mis-solicitudes/mis-solicitudes';
 import { BecaDetalleComponent } from './estudiantes/beca-detalle/beca-detalle';
+import { ConfiguracionComponent } from './configuracion/configuracion';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
 
   // Dashboard accesible para admin y estudiante
-  { 
-    path: 'dashboard', 
-    component: DashboardComponent, 
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['admin', 'estudiante'] }
   },
@@ -56,7 +57,7 @@ export const routes: Routes = [
   { path: 'detalle-evaluacion', component: DetalleEvaluacionComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
   { path: 'notificacion', component: NotificacionComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
   { path: 'auditoria', component: AuditoriaComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
-
+  { path: 'configuracion', component: ConfiguracionComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
   // Rutas solo estudiante
   { path: 'perfil', component: PerfilComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['estudiante'] } },
   { path: 'becas-disponibles', component: BecasDisponiblesComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['estudiante'] } },

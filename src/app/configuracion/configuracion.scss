@@ -1,0 +1,443 @@
+/* Variables */
+$primary-color: #2c3e50;
+$secondary-color: #3498db;
+$success-color: #27ae60;
+$error-color: #e74c3c;
+$warning-color: #f39c12;
+$light-gray: #ecf0f1;
+$medium-gray: #bdc3c7;
+$dark-gray: #7f8c8d;
+$white: #ffffff;
+$sidebar-width: 260px;
+
+/* Estructura principal */
+.configuracion-cont-selector {
+  margin-left: $sidebar-width;
+  padding: 2rem;
+  min-height: 100vh;
+  background: #f5f7fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: margin-left 0.3s ease;
+  
+  @media (max-width: 1024px) {
+    margin-left: 0;
+    padding: 1.5rem;
+  }
+}
+
+/* Header */
+.header-configuracion {
+  margin-bottom: 2rem;
+  
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: $primary-color;
+    margin-bottom: 0.5rem;
+  }
+  
+  p {
+    font-size: 1rem;
+    color: $dark-gray;
+    margin: 0;
+  }
+}
+
+/* Tabs */
+.config-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid $medium-gray;
+  padding-bottom: 0.5rem;
+  
+  button {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    font-weight: 500;
+    color: $dark-gray;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    
+    .icon {
+      font-size: 1.1rem;
+    }
+    
+    &:hover {
+      color: $primary-color;
+      background: rgba($secondary-color, 0.1);
+    }
+    
+    &.active {
+      color: $secondary-color;
+      font-weight: 600;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -0.5rem;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: $secondary-color;
+      }
+    }
+  }
+}
+
+/* Contenido de tabs */
+.tab-content {
+  background: $white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.tab-pane {
+  padding: 1.5rem;
+}
+
+/* Card */
+.card {
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+    
+    h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 0;
+      color: $primary-color;
+    }
+    
+    p {
+      font-size: 0.9rem;
+      color: $dark-gray;
+      margin: 0;
+    }
+    
+    .btn-add {
+      background: $secondary-color;
+      color: $white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background: darken($secondary-color, 10%);
+        transform: translateY(-2px);
+      }
+      
+      .icon {
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+/* Filtros de búsqueda */
+.search-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  
+  .search-input,
+  .filter-select {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    border: 1px solid $medium-gray;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    
+    &:focus {
+      outline: none;
+      border-color: $secondary-color;
+      box-shadow: 0 0 0 3px rgba($secondary-color, 0.1);
+    }
+  }
+}
+
+/* Tabla */
+.table-modern {
+  width: 100%;
+  border-collapse: collapse;
+  
+  th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid $light-gray;
+  }
+  
+  th {
+    font-weight: 600;
+    color: $primary-color;
+    background: #f8f9fa;
+  }
+  
+  tr:hover {
+    background: #f5f7fa;
+  }
+  
+  .no-results {
+    text-align: center;
+    padding: 2rem;
+    color: $dark-gray;
+    font-style: italic;
+  }
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  
+  &-active {
+    background: rgba($success-color, 0.1);
+    color: $success-color;
+  }
+  
+  &-inactive {
+    background: rgba($error-color, 0.1);
+    color: $error-color;
+  }
+}
+
+/* Botones de acción */
+.actions-cell {
+  display: flex;
+  gap: 0.5rem;
+  
+  button {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    
+    &:hover {
+      transform: scale(1.1);
+    }
+    
+    i {
+      font-size: 1.1rem;
+    }
+  }
+  
+  .btn-edit {
+    background: rgba($secondary-color, 0.1);
+    color: $secondary-color;
+    
+    &:hover {
+      background: $secondary-color;
+      color: $white;
+    }
+  }
+  
+  .btn-delete {
+    background: rgba($error-color, 0.1);
+    color: $error-color;
+    
+    &:hover {
+      background: $error-color;
+      color: $white;
+    }
+  }
+}
+
+/* Mensajes y modales */
+.error-message {
+  background: rgba($error-color, 0.1);
+  color: $error-color;
+  padding: 1rem;
+  border-radius: 4px;
+  border-left: 4px solid $error-color;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.modal-success {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  
+  .modal-content {
+    background: $white;
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    
+    h3 {
+      margin-top: 0;
+      color: $primary-color;
+    }
+    
+    p {
+      margin: 1rem 0;
+    }
+    
+    button {
+      background: $secondary-color;
+      color: $white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background: darken($secondary-color, 10%);
+      }
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+      
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+      }
+      
+      input, select, textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid $medium-gray;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+    }
+    
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 1rem;
+      
+      .btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        
+        &.btn-primary {
+          background: $secondary-color;
+          color: $white;
+          
+          &:hover {
+            background: darken($secondary-color, 10%);
+          }
+        }
+        
+        &.btn-secondary {
+          background: $medium-gray;
+          color: $white;
+          
+          &:hover {
+            background: darken($medium-gray, 10%);
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: $sidebar-width;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba($secondary-color, 0.2);
+    border-radius: 50%;
+    border-top-color: $secondary-color;
+    animation: spin 1s ease-in-out infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .config-tabs {
+    overflow-x: auto;
+    padding-bottom: 0;
+    
+    button {
+      white-space: nowrap;
+    }
+  }
+  
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    
+    .btn-add {
+      width: 100%;
+    }
+  }
+  
+  .search-filters {
+    flex-direction: column;
+    
+    .search-input,
+    .filter-select {
+      width: 100%;
+    }
+  }
+  
+  .table-modern {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .loading-overlay {
+    left: 0;
+  }
+}

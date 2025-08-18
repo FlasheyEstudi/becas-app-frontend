@@ -1,21 +1,21 @@
-// src/app/estudiantes/estudiantes.component.ts
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 
-// Interfaces necesarias
 interface Estudiante {
   id: number;
   nombre: string;
-  apellidos: string | null;
-  email: string;
-  username: string;
-  password: string;
-  role: string;
-  estadoId?: number | null;
-  carreraId?: number | null;
+  apellidos: string;
+  correo: string;
+  username?: string;
+  role?: string;
+  estadoId?: number;
+  carreraId?: number;
+  estadoNombre?: string;
+  carreraNombre?: string;
 }
 
 interface Carrera {
@@ -26,15 +26,6 @@ interface Carrera {
 interface Estado {
   id: number;
   nombre: string;
-}
-
-interface CreateEstudianteDto {
-  nombre: string;
-  apellidos: string | null;
-  email: string;
-  role?: string;
-  estadoId?: number | null;
-  carreraId?: number | null;
 }
 
 @Component({
@@ -49,66 +40,93 @@ export class EstudiantesComponent implements OnInit {
   filteredEstudiantes: Estudiante[] = [];
   error: string = '';
   loading: boolean = false;
-
   totalEstudiantes: number = 0;
   estudiantesActivos: number = 0;
   administradores: number = 0;
-  edadPromedio: number = 0;
-
-  newStudent: CreateEstudianteDto = {
+  
+  // Nuevo: Modal de registro
+  showModal: boolean = false;
+  
+  newStudent = {
     nombre: '',
     apellidos: '',
-    email: '',
-    role: 'estudiante',
-    estadoId: null,
-    carreraId: null
+    correo: '',
+    estadoId: undefined as number | undefined,
+    carreraId: undefined as number | undefined,
+    role: 'estudiante'
   };
 
   searchTerm: string = '';
   filtroEstado: string = '';
   filtroCarrera: string = '';
   filtroRol: string = '';
-
   carrerasDisponibles: Carrera[] = [];
   estadosDisponibles: Estado[] = [];
-
   showSuccessMessage: boolean = false;
-  credencialesEstudiante: { username: string, email: string, password: string } = {
+  credencialesEstudiante = {
     username: '',
-    email: '',
+    correo: '',
     password: ''
   };
 
   constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit() {
+    this.verifyAdminRole();
+    this.cargarDatosIniciales();
+  }
+
+  private verifyAdminRole() {
     const token = localStorage.getItem('token');
     if (!token) {
       this.router.navigate(['/login']);
       return;
     }
-
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       if (payload.role !== 'admin') {
         this.router.navigate(['/dashboard']);
-        return;
       }
     } catch {
       this.router.navigate(['/login']);
-      return;
     }
-
-    this.cargarDatosIniciales();
   }
 
   private cargarDatosIniciales() {
     this.loading = true;
-    Promise.all([
-      this.cargarEstados(),
-      this.cargarCarreras(),
-      this.cargarEstudiantes()
-    ]).finally(() => this.loading = false);
+    forkJoin({
+      estados: this.http.get<Estado[]>('http://localhost:3000/api-beca/estado', { headers: this.getHeaders() }),
+      carreras: this.http.get<Carrera[]>('http://localhost:3000/api-beca/carrera', { headers: this.getHeaders() }),
+      estudiantes: this.http.get<any[]>('http://localhost:3000/api-beca/estudiantes', { headers: this.getHeaders() })
+    }).subscribe({
+      next: ({ estados, carreras, estudiantes }) => {
+        this.estadosDisponibles = estados || [];
+        this.carrerasDisponibles = carreras || [];
+        this.estudiantes = this.mapEstudiantes(estudiantes);
+        this.filteredEstudiantes = [...this.estudiantes];
+        this.calcularKPIs();
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'Error cargando datos iniciales: ' + (err.error?.message || err.message);
+        this.loading = false;
+      }
+    });
+  }
+
+  private mapEstudiantes(data: any[]): Estudiante[] {
+    return data.map(item => ({
+      id: item.id,
+      nombre: item.nombre,
+      apellidos: item.apellidos,
+      correo: item.correo,
+      username: item.user?.username || '-', // Corregido: usar item.user.username
+      role: item.user?.role || 'estudiante',
+      estadoId: item.estadoId,
+      carreraId: item.carreraId,
+      estadoNombre: this.getEstadoNombre(item.estadoId),
+      carreraNombre: this.getCarreraNombre(item.carreraId)
+    }));
   }
 
   private getHeaders(): HttpHeaders {
@@ -119,54 +137,26 @@ export class EstudiantesComponent implements OnInit {
     });
   }
 
-  cargarEstados() {
-    return new Promise<void>((resolve) => {
-      this.http.get<Estado[]>('http://localhost:3000/api-beca/estado', {
-        headers: this.getHeaders()
-      }).subscribe({
-        next: (data) => this.estadosDisponibles = data,
-        error: (err) => console.error('Error cargando estados:', err),
-        complete: () => resolve()
-      });
-    });
+  getEstadoNombre(id?: number): string {
+    if (id == null) return 'No asignado';
+    const estado = this.estadosDisponibles.find(e => e.id === id);
+    return estado ? estado.nombre : 'No encontrado';
   }
 
-  cargarCarreras() {
-    return new Promise<void>((resolve) => {
-      this.http.get<Carrera[]>('http://localhost:3000/api-beca/carrera', {
-        headers: this.getHeaders()
-      }).subscribe({
-        next: (data) => this.carrerasDisponibles = data,
-        error: (err) => console.error('Error cargando carreras:', err),
-        complete: () => resolve()
-      });
-    });
-  }
-
-  cargarEstudiantes() {
-    return new Promise<void>((resolve) => {
-      this.http.get<Estudiante[]>('http://localhost:3000/api-beca/users', {
-        headers: this.getHeaders()
-      }).subscribe({
-        next: (data) => {
-          this.estudiantes = data;
-          this.filteredEstudiantes = [...data];
-          this.calcularKPIs();
-        },
-        error: (err) => this.error = 'Error cargando estudiantes: ' + err.message,
-        complete: () => resolve()
-      });
-    });
+  getCarreraNombre(id?: number): string {
+    if (id == null) return 'No asignada';
+    const carrera = this.carrerasDisponibles.find(c => c.id === id);
+    return carrera ? carrera.nombre : 'No encontrada';
   }
 
   calcularKPIs() {
     this.totalEstudiantes = this.estudiantes.length;
     this.estudiantesActivos = this.estudiantes.filter(e => e.estadoId === 1).length;
     this.administradores = this.estudiantes.filter(e => e.role === 'admin').length;
-    this.edadPromedio = 0; // Ajusta según tus datos
   }
 
   private validarEstudiante(): boolean {
+    this.error = '';
     if (!this.newStudent.nombre?.trim()) {
       this.error = 'Nombre es requerido';
       return false;
@@ -175,75 +165,49 @@ export class EstudiantesComponent implements OnInit {
       this.error = 'Apellidos son requeridos';
       return false;
     }
-    if (!this.newStudent.email?.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      this.error = 'Correo inválido';
+    if (!this.newStudent.correo?.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      this.error = 'Correo electrónico inválido';
       return false;
     }
     return true;
   }
 
-  private generarUsername(): string {
-    const baseUsername = this.newStudent.nombre.toLowerCase().replace(/\s+/g, '') +
-                        (this.newStudent.apellidos || '').toLowerCase().replace(/\s+/g, '');
-    return baseUsername + Math.floor(Math.random() * 1000);
-  }
-
-  private generarPasswordAleatoria(length = 8): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let pass = '';
-    for (let i = 0; i < length; i++) {
-      pass += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return pass;
-  }
-
-  onSubmitNewStudent() {
+  // Abrir modal de registro
+  abrirModalRegistro() {
+    this.showModal = true;
     this.error = '';
-    this.showSuccessMessage = false;
+  }
 
+  // Cerrar modal de registro
+  cerrarModalRegistro() {
+    this.showModal = false;
+    this.resetFormulario();
+  }
+
+  // Corregido: Ruta correcta sin "/completo"
+  onSubmitNewStudent() {
     if (!this.validarEstudiante()) return;
-
     this.loading = true;
-    console.log('Enviando datos al servidor:', this.newStudent);
-
-    // Generar username y password automáticamente
-    const generatedUsername = this.generarUsername();
-    const generatedPassword = this.generarPasswordAleatoria();
-
-    // Agregar username y password al objeto enviado
-    const studentData = {
-      ...this.newStudent,
-      username: generatedUsername,
-      password: generatedPassword
-    };
-
-    this.http.post<Estudiante>('http://localhost:3000/api-beca/users', studentData, {
+    this.showSuccessMessage = false;
+    
+    // Corregido: Usar ruta correcta sin "/completo"
+    this.http.post<any>('http://localhost:3000/api-beca/estudiantes', this.newStudent, {
       headers: this.getHeaders()
     }).subscribe({
       next: (response) => {
-        console.log('Respuesta del servidor:', response);
-        
-        // Usar las credenciales generadas
         this.credencialesEstudiante = {
-          username: generatedUsername,
-          email: this.newStudent.email,
-          password: generatedPassword
+          username: response.credenciales.username,
+          correo: response.credenciales.correo, // Corregido: usar correo en lugar de email
+          password: response.credenciales.password
         };
-        console.log('Credenciales guardadas:', this.credencialesEstudiante);
-        
         this.showSuccessMessage = true;
-        
         this.resetFormulario();
-        this.cargarEstudiantes();
+        this.cargarDatosIniciales();
+        this.cerrarModalRegistro(); // Cerrar modal después de crear
       },
       error: (err) => {
-        console.error('Error en la solicitud:', err);
-        this.error = 'Error creando estudiante: ' + (err.error?.message || err.message);
+        this.error = 'Error al crear estudiante: ' + (err.error?.message || err.message || 'Error desconocido');
         this.loading = false;
-      },
-      complete: () => {
-        this.loading = false;
-        console.log('Solicitud completada');
       }
     });
   }
@@ -251,41 +215,36 @@ export class EstudiantesComponent implements OnInit {
   filtrarEstudiantes() {
     let filtered = [...this.estudiantes];
     const term = this.searchTerm.toLowerCase();
-
     if (term) {
       filtered = filtered.filter(e =>
         e.nombre.toLowerCase().includes(term) ||
-        (e.apellidos?.toLowerCase() ?? '').includes(term) || // Manejo de null/undefined
-        e.email.toLowerCase().includes(term)
+        e.apellidos.toLowerCase().includes(term) ||
+        e.correo.toLowerCase().includes(term)
       );
     }
-
     if (this.filtroEstado) {
       filtered = filtered.filter(e => e.estadoId?.toString() === this.filtroEstado);
     }
-
     if (this.filtroCarrera) {
       filtered = filtered.filter(e => e.carreraId?.toString() === this.filtroCarrera);
     }
-
     if (this.filtroRol) {
       filtered = filtered.filter(e => e.role === this.filtroRol);
     }
-
     this.filteredEstudiantes = filtered;
   }
 
   deleteEstudiante(id: number) {
-    if (!confirm('¿Eliminar este estudiante?')) return;
-
+    if (!confirm('¿Está seguro de eliminar este estudiante?')) return;
     this.loading = true;
-
-    this.http.delete(`http://localhost:3000/api-becausers/${id}`, {
+    this.http.delete(`http://localhost:3000/api-beca/estudiantes/${id}`, {
       headers: this.getHeaders()
     }).subscribe({
-      next: () => this.cargarEstudiantes(),
-      error: (err) => this.error = 'Error eliminando estudiante: ' + err.message,
-      complete: () => this.loading = false
+      next: () => this.cargarDatosIniciales(),
+      error: (err) => {
+        this.error = 'Error eliminando estudiante: ' + (err.error?.message || err.message);
+        this.loading = false;
+      }
     });
   }
 
@@ -293,23 +252,11 @@ export class EstudiantesComponent implements OnInit {
     this.newStudent = {
       nombre: '',
       apellidos: '',
-      email: '',
-      role: 'estudiante',
-      estadoId: null,
-      carreraId: null
+      correo: '',
+      estadoId: undefined,
+      carreraId: undefined,
+      role: 'estudiante'
     };
     this.error = '';
-  }
-
-  getEstadoNombre(id?: number | null): string {
-    if (!id) return '-';
-    const estado = this.estadosDisponibles.find(e => e.id === id);
-    return estado ? estado.nombre : '-';
-  }
-
-  getCarreraNombre(id?: number | null): string {
-    if (!id) return '-';
-    const carrera = this.carrerasDisponibles.find(c => c.id === id);
-    return carrera ? carrera.nombre : '-';
   }
 }

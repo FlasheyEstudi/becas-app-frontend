@@ -1,4 +1,3 @@
-// Guardia de roles para proteger rutas
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, Router } from '@angular/router';
 
@@ -8,14 +7,15 @@ import { CanActivate, ActivatedRouteSnapshot, Router } from '@angular/router';
 export class RoleGuard implements CanActivate {
   constructor(private router: Router) {}
 
-  // Método para verificar si el usuario tiene permisos para acceder a la ruta
   canActivate(route: ActivatedRouteSnapshot): boolean {
-    const expectedRoles = route.data['roles'] as string[];
-    const tokenRole = localStorage.getItem('role');
-    if (!tokenRole || !expectedRoles.includes(tokenRole)) {
-      this.router.navigate(['/login']);
-      return false;
-    }
-    return true;
+    const role = localStorage.getItem('role')?.toLowerCase();
+    const allowedRoles = (route.data['roles'] as string[]).map(r => r.toLowerCase());
+
+    if (role && allowedRoles.includes(role)) return true;
+
+    // Redirigir según si hay token
+    if (localStorage.getItem('token')) this.router.navigate(['/dashboard']);
+    else this.router.navigate(['/login']);
+    return false;
   }
 }

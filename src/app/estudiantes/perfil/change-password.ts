@@ -1,8 +1,7 @@
-// Componente para cambiar contraseña
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-change-password',
@@ -21,8 +20,8 @@ export class ChangePasswordComponent {
   // Mensaje de éxito
   success = '';
   
-  // URL base para la API
-  private apiUrl = 'http://localhost:3000/api-beca/users';
+  // URL base para la API - Corregida para usar auth
+  private apiUrl = 'http://localhost:3000/api-beca/auth';
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
     // Inicializar formulario con validaciones
@@ -48,9 +47,21 @@ export class ChangePasswordComponent {
       this.error = 'Por favor, corrige los errores del formulario.';
       return;
     }
+    
     const { currentPassword, newPassword } = this.form.value;
     this.loading = true;
-    this.http.post(`${this.apiUrl}/change-password`, { currentPassword, newPassword }).subscribe({
+    
+    // Obtener el token y construir headers
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    
+    this.http.post(`${this.apiUrl}/change-password`, { 
+      currentPassword, 
+      newPassword 
+    }, { headers }).subscribe({
       next: () => {
         this.success = 'Contraseña cambiada exitosamente.';
         this.form.reset();

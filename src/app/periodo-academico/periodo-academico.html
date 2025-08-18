@@ -1,19 +1,18 @@
 <div class="periodo-academico-contenedor">
   <h2 class="titulo-principal">Períodos Académicos</h2>
   
-  <!-- Mensaje de error si existe -->
+  <!-- Mensaje de error -->
   <div *ngIf="error" class="alerta">{{ error }}</div>
   
   <!-- Indicador de carga -->
-  <div *ngIf="loading" class="loading">
-    Cargando...
-  </div>
+  <div *ngIf="loading" class="loading">Cargando...</div>
   
   <!-- Buscador -->
   <div class="search-container">
     <input 
       type="text" 
       [(ngModel)]="searchTerm" 
+      [ngModelOptions]="{standalone: true}" 
       (input)="onSearch()" 
       placeholder="Buscar por nombre o año..." 
       class="search-input" />
@@ -23,6 +22,7 @@
   <div class="form-container">
     <h3 class="subtitulo">Añadir Nuevo Período Académico</h3>
     <form (ngSubmit)="onSubmitNewPeriodo()" #periodoForm="ngForm">
+      
       <div class="form-group">
         <label for="nombre">Nombre:</label>
         <input 
@@ -30,6 +30,7 @@
           id="nombre" 
           name="nombre" 
           [(ngModel)]="newPeriodo.nombre" 
+          [ngModelOptions]="{standalone: true}" 
           placeholder="Nombre del período" 
           required />
       </div>
@@ -41,6 +42,7 @@
           id="anioAcademico" 
           name="anioAcademico" 
           [(ngModel)]="newPeriodo.anioAcademico" 
+          [ngModelOptions]="{standalone: true}" 
           placeholder="Ej. 2025-2026" 
           required />
       </div>
@@ -51,7 +53,8 @@
           type="date" 
           id="fechaInicio" 
           name="fechaInicio" 
-          [(ngModel)]="newPeriodo.fechaInicio" 
+          [(ngModel)]="newPeriodo.fechainicio" 
+          [ngModelOptions]="{standalone: true}" 
           required />
       </div>
       
@@ -61,7 +64,8 @@
           type="date" 
           id="fechaFin" 
           name="fechaFin" 
-          [(ngModel)]="newPeriodo.fechaFin" 
+          [(ngModel)]="newPeriodo.fechafin" 
+          [ngModelOptions]="{standalone: true}" 
           required />
       </div>
       
@@ -72,18 +76,15 @@
           id="estadoId" 
           name="estadoId" 
           [(ngModel)]="newPeriodo.estadoId" 
+          [ngModelOptions]="{standalone: true}" 
           placeholder="ID del estado" 
           required 
           min="1" />
       </div>
       
       <div class="form-actions">
-        <button type="submit" [disabled]="loading" class="btn-primario">
-          Añadir Período
-        </button>
-        <button type="button" (click)="onCancel()" class="btn-secundario">
-          Cancelar
-        </button>
+        <button type="submit" [disabled]="loading" class="btn-primario">Añadir Período</button>
+        <button type="button" (click)="onCancel()" class="btn-secundario">Cancelar</button>
       </div>
     </form>
   </div>
@@ -103,7 +104,6 @@
         <th>Fecha Inicio</th>
         <th>Fecha Fin</th>
         <th>Estado ID</th>
-        <!-- <th>Estado Nombre</th> --> <!-- Eliminado -->
         <th>Acciones</th>
       </tr>
     </thead>
@@ -112,25 +112,22 @@
         <td>{{ periodo.id }}</td>
         <td>{{ periodo.nombre }}</td>
         <td>{{ periodo.anioAcademico }}</td>
-        <td>{{ periodo.fechaInicio | date:'dd/MM/yyyy' }}</td>
-        <td>{{ periodo.fechaFin | date:'dd/MM/yyyy' }}</td>
+        <td>{{ periodo.fechainicio | date:'dd/MM/yyyy' }}</td>
+        <td>{{ periodo.fechafin | date:'dd/MM/yyyy' }}</td>
         <td>{{ periodo.estadoId }}</td>
-        <!-- <td>{{ periodo.estadoNombre || 'N/A' }}</td> --> <!-- Eliminado -->
         <td>
-          <button (click)="deletePeriodo(periodo.id)" class="btn-danger btn-sm">
-            Eliminar
-          </button>
+          <button (click)="deletePeriodo(periodo.id)" class="btn-danger btn-sm">Eliminar</button>
         </td>
       </tr>
     </tbody>
   </table>
   
-  <!-- Mensaje si no hay períodos -->
+  <!-- Mensaje si no hay resultados de búsqueda -->
   <p *ngIf="filteredPeriodos.length === 0 && !loading && !error" class="texto-centro">
     No hay períodos académicos que coincidan con la búsqueda.
   </p>
   
-  <!-- Mensaje si no hay períodos en la base de datos -->
+  <!-- Mensaje si no hay registros -->
   <p *ngIf="periodos.length === 0 && !loading && !error" class="texto-centro">
     No hay períodos académicos registrados en el sistema.
   </p>

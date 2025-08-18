@@ -54,8 +54,10 @@ export class MisSolicitudesComponent implements OnInit {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         this.estudianteId = payload.sub || payload.id;
+        console.log('ID del estudiante obtenido:', this.estudianteId);
       } catch (err) {
         console.error('Error al decodificar token:', err);
+        this.estudianteId = null;
       }
     }
   }
@@ -79,9 +81,14 @@ export class MisSolicitudesComponent implements OnInit {
       return;
     }
 
+    console.log('Buscando solicitudes para estudiante ID:', this.estudianteId);
+
+    // Eliminar el parámetro limit para traer todas las solicitudes
     this.http.get<SolicitudBeca[]>(`${this.baseUrl}/estudiante/${this.estudianteId}`, { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
+          console.log('Solicitudes cargadas:', data);
+          
           this.solicitudes = data.map(solicitud => {
             const estudianteData = solicitud.estudiante || {
               id: 0,
@@ -100,6 +107,7 @@ export class MisSolicitudesComponent implements OnInit {
           this.loading = false;
         },
         error: (err) => {
+          console.error('Error al cargar solicitudes:', err);
           this.error = 'Error al cargar solicitudes: ' + (err.error?.message || err.message);
           this.loading = false;
         }

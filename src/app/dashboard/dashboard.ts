@@ -28,6 +28,21 @@ interface SolicitudBeca {
   fechaResultado: string | null;
 }
 
+interface Estudiante {
+  id: number;
+  nombre: string;
+  apellidos: string;
+  correo: string;
+  estadoId?: number;
+  carreraId?: number;
+  user?: { username: string; role: string };
+}
+
+interface TipoBeca {
+  id: number;
+  nombre: string;
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -46,19 +61,20 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   monthlyTrend: number[] = [];
   statusDistribution: number[] = [];
   pendingRequests: any[] = [];
+  tipoBecaData: any[] = [];
   loading: boolean = false;
   error: string = '';
 
   private baseUrl = 'http://localhost:3000/api-beca/solicitudes-beca';
   private kpiBaseUrl = 'http://localhost:3000/api-beca';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router) { }
 
   ngOnInit(): void {
     this.cargarDatosDashboard();
   }
 
-  ngAfterViewInit(): void {}
+  ngAfterViewInit(): void { }
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
@@ -76,7 +92,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       await Promise.all([
         this.cargarDatosKPIs(),
         this.cargarDatosGraficos(),
-        this.cargarSolicitudesRecientes()
+        this.cargarSolicitudesRecientes(),
+        this.cargarDatosTipoBeca()
       ]);
       this.renderizarGraficos();
     } catch (error) {
@@ -89,13 +106,43 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   async cargarDatosKPIs(): Promise<void> {
     try {
       const headers = this.getHeaders();
-      const [estudiantes, becas, pendientes, aprobadas] = await Promise.all([
-        this.http.get<{count: number}>(`${this.kpiBaseUrl}/estudiantes/count`, { headers }).toPromise().catch(() => ({count: 0})),
-        this.http.get<{count: number}>(`${this.kpiBaseUrl}/tipo-beca/count`, { headers }).toPromise().catch(() => ({count: 0})),
-        this.http.get<{count: number}>(`${this.baseUrl}/count?estadoId=1`, { headers }).toPromise().catch(() => ({count: 0})),
-        this.http.get<{count: number}>(`${this.baseUrl}/count?estadoId=2`, { headers }).toPromise().catch(() => ({count: 0}))
+
+      // ✅ Estudiantes como arreglo (fallback: [])
+      const estudiantesResponse = await this.http
+        .get<Estudiante[]>(`${this.kpiBaseUrl}/estudiantes`, { headers })
+        .toPromise()
+        .catch(() => []);
+
+      const estudiantesCount = estudiantesResponse?.length || 0;
+
+      // ✅ Promesas con fallback seguro
+      const becasPromise = this.http
+        .get<{ count: number }>(`${this.kpiBaseUrl}/tipo-beca/count`, { headers })
+        .toPromise()
+        .catch(() => ({ count: 0 }));
+
+      const pendientesPromise = this.http
+        .get<{ count: number }>(`${this.baseUrl}/count?estadoId=1`, { headers })
+        .toPromise()
+        .catch(() => ({ count: 0 }));
+
+      const aprobadasPromise = this.http
+        .get<{ count: number }>(`${this.baseUrl}/count?estadoId=2`, { headers })
+        .toPromise()
+        .catch(() => ({ count: 0 }));
+
+      const [becas, pendientes, aprobadas] = await Promise.all([
+        becasPromise,
+        pendientesPromise,
+        aprobadasPromise
       ]);
-      this.actualizarKPIs(estudiantes?.count || 0, becas?.count || 0, pendientes?.count || 0, aprobadas?.count || 0);
+
+      this.actualizarKPIs(
+        estudiantesCount,
+        becas?.count ?? 0,
+        pendientes?.count ?? 0,
+        aprobadas?.count ?? 0
+      );
     } catch (error) {
       this.handleError('Error al cargar KPIs', error);
     }
@@ -111,27 +158,89 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   async cargarDatosGraficos(): Promise<void> {
     try {
       const headers = this.getHeaders();
-      const [tendencia, estados] = await Promise.all([
-        this.http.get<{data: number[]}>(`${this.baseUrl}/tendencia?months=6`, { headers }).toPromise().catch(() => ({data: [0, 0, 0, 0, 0, 0]})),
-        this.http.get<{data: number[]}>(`${this.baseUrl}/estadisticas/estados`, { headers }).toPromise().catch(() => ({data: [0, 0, 0, 0]}))
-      ]);
-      this.monthlyTrend = tendencia?.data || [0, 0, 0, 0, 0, 0];
-      this.statusDistribution = estados?.data || [0, 0, 0, 0];
+
+      const tendenciaPromise = this.http
+        .get<{ data: number[] }>(`${this.baseUrl}/tendencia?months=6`, { headers })
+        .toPromise()
+        .catch(() => ({ data: [0, 0, 0, 0, 0, 0] }));
+
+      const estadosPromise = this.http
+        .get<{ data: number[] }>(`${this.baseUrl}/estadisticas/estados`, { headers })
+        .toPromise()
+        .catch(() => ({ data: [0, 0, 0, 0] }));
+
+      const [tendencia, estados] = await Promise.all([tendenciaPromise, estadosPromise]);
+
+      this.monthlyTrend = tendencia?.data ?? [0, 0, 0, 0, 0, 0];
+      this.statusDistribution = estados?.data ?? [0, 0, 0, 0];
     } catch (error) {
       this.handleError('Error al cargar datos para gráficos', error);
+    }
+  }
+
+  async cargarDatosTipoBeca(): Promise<void> {
+    try {
+      const headers = this.getHeaders();
+
+      // Obtener tipos de beca
+      const tiposResponse = await this.http
+        .get<TipoBeca[]>(`${this.kpiBaseUrl}/tipo-beca`, { headers })
+        .toPromise()
+        .catch(() => []);
+
+      const tiposBeca = tiposResponse || [];
+
+      // Para cada tipo de beca, obtener estadísticas
+      const estadisticasPromises = tiposBeca.map(async (tipo) => {
+        const totalPromise = this.http
+          .get<{ count: number }>(`${this.baseUrl}/count?tipoBecaId=${tipo.id}`, { headers })
+          .toPromise()
+          .catch(() => ({ count: 0 }));
+
+        const aprobadasPromise = this.http
+          .get<{ count: number }>(`${this.baseUrl}/count?tipoBecaId=${tipo.id}&estadoId=2`, { headers })
+          .toPromise()
+          .catch(() => ({ count: 0 }));
+
+        const [total, aprobadas] = await Promise.all([totalPromise, aprobadasPromise]);
+
+        return {
+          tipo: tipo.nombre,
+          total: total?.count ?? 0,
+          aprobadas: aprobadas?.count ?? 0
+        };
+      });
+
+      const estadisticas = await Promise.all(estadisticasPromises);
+      this.tipoBecaData = estadisticas;
+
+    } catch (error) {
+      this.handleError('Error al cargar datos de tipo de beca', error);
     }
   }
 
   async cargarSolicitudesRecientes(): Promise<void> {
     try {
       const headers = this.getHeaders();
-      const response = await this.http.get<SolicitudBeca[]>(`${this.baseUrl}/pendientes?limit=5`, { headers }).toPromise().catch(() => []);
-      this.pendingRequests = (response || []).map(item => ({
+
+      const response = await this.http
+        .get<SolicitudBeca[]>(`${this.baseUrl}/pendientes`, { headers })
+        .toPromise()
+        .catch(() => []);
+
+      const solicitudes = response ?? [];
+
+      this.pendingRequests = solicitudes.slice(0, 5).map(item => ({
         id: item.id,
-        estudiante: (item.estudiante?.nombre ?? '') + ' ' + (item.estudiante?.apellido ?? '') || 'Desconocido',
-        tipo: item.tipoBeca?.nombre || 'Sin tipo',
-        fecha: item.fechaSolicitud 
-          ? new Date(item.fechaSolicitud).toLocaleDateString('es-ES', {day: '2-digit', month: '2-digit'})
+        estudiante:
+          ((item.estudiante?.nombre ?? '') + ' ' + (item.estudiante?.apellido ?? '')).trim() ||
+          'Desconocido',
+        tipo: item.tipoBeca?.nombre ?? 'Sin tipo',
+        fecha: item.fechaSolicitud
+          ? new Date(item.fechaSolicitud).toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit'
+          })
           : 'N/A'
       }));
     } catch (error) {
@@ -145,10 +254,15 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     if (trendChart) {
       trendChart.destroy();
     }
-    
+
     const statusChart = Chart.getChart('statusChart');
     if (statusChart) {
       statusChart.destroy();
+    }
+
+    const tipoBecaChart = Chart.getChart('tipoBecaChart');
+    if (tipoBecaChart) {
+      tipoBecaChart.destroy();
     }
 
     if (document.getElementById('trendChart')) {
@@ -191,6 +305,55 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         }
       });
     }
+
+    if (document.getElementById('tipoBecaChart')) {
+      const ctx = document.getElementById('tipoBecaChart') as HTMLCanvasElement;
+      if (ctx) {
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: this.tipoBecaData.map(item => item.tipo),
+            datasets: [
+              {
+                label: 'Solicitudes Totales',
+                data: this.tipoBecaData.map(item => item.total),
+                backgroundColor: '#3b82f6',
+                borderColor: '#1d4ed8',
+                borderWidth: 1
+              },
+              {
+                label: 'Solicitudes Aprobadas',
+                data: this.tipoBecaData.map(item => item.aprobadas),
+                backgroundColor: '#10b981',
+                borderColor: '#047857',
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top',
+              },
+              title: {
+                display: true,
+                text: 'Solicitudes por Tipo de Beca'
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1
+                }
+              }
+            }
+          }
+        });
+      }
+    }
   }
 
   private obtenerUltimosMeses(cantidad: number): string[] {
@@ -206,9 +369,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   private handleError(contexto: string, error: any): void {
     console.error(`${contexto}:`, error);
-    this.error = `${contexto}. ${error.message || 'Verifique su conexión'}`;
-    if (error.status === 404) this.error += ' (Recurso no encontrado)';
-    else if (error.status === 401) this.error += ' (No autorizado)';
+    this.error = `${contexto}. ${error?.message || 'Verifique su conexión'}`;
+    if (error?.status === 404) this.error += ' (Recurso no encontrado)';
+    else if (error?.status === 401) this.error += ' (No autorizado)';
   }
 
   navegarASolicitudes(): void {

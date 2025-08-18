@@ -1,52 +1,218 @@
+
+
 .perfil-container {
-  max-width: 500px;
-  margin: auto;
-  padding: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
 
-  h2, h3 {
-    text-align: center;
-    margin-bottom: 1rem;
+.card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
 
-  form div {
-    margin-bottom: 1rem;
+  h3 {
+    color: var(--text-color);
+    margin-top: 0;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  &:last-child {
+    border-bottom: none;
   }
 
-  label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 0.3rem;
+  .icon {
+    font-size: 1.2rem;
+    margin-top: 2px;
   }
 
-  input {
-    width: 100%;
-    padding: 0.4rem;
-    font-size: 1rem;
+  .label {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 4px;
+  }
+
+  .value {
+    color: var(--text-color);
+    opacity: 0.9;
+  }
+}
+
+.historial-becas .becas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.beca-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.beca-item:hover {
+  background-color: rgba(61, 216, 189, 0.1);
+}
+
+.beca-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.beca-name {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.beca-year {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.beca-status {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.beca-status.activa {
+  background-color: #4caf50;
+  color: white;
+}
+
+.beca-status.finalizada {
+  background-color: #f44336;
+  color: white;
+}
+
+.cambiar-contrasena {
+  .form-group {
+    margin-bottom: 15px;
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--input-border);
+      border-radius: 4px;
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      box-sizing: border-box;
+
+      &:focus {
+        outline: none;
+        border-color: var(--btn-primary-bg);
+      }
+    }
   }
 
   button {
-    width: 100%;
-    padding: 0.6rem;
-    background-color: #007bff;
+    background: var(--btn-primary-bg);
     color: white;
-    font-weight: bold;
     border: none;
+    padding: 12px 20px;
     border-radius: 4px;
     cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s ease;
+    width: 100%;
 
-    &:disabled {
-      background-color: #aaa;
+    &:hover:not(:disabled) {
+      background: var(--btn-primary-hover-bg);
+    }
+
+    &[disabled] {
+      background: var(--btn-secondary-bg);
       cursor: not-allowed;
     }
   }
 
-  .error {
-    color: #d9534f;
-    margin-top: 0.5rem;
+  .success {
+    color: #4caf50;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: rgba(76, 175, 80, 0.1);
+    border-radius: 4px;
   }
 
-  .success {
-    color: #28a745;
-    margin-top: 0.5rem;
+  .error {
+    color: #f44336;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: rgba(244, 67, 54, 0.1);
+    border-radius: 4px;
+  }
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-color);
+}
+
+.error {
+  background-color: var(--alert-bg-error);
+  color: var(--alert-text-color);
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .perfil-container {
+    padding: 10px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .beca-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .beca-info {
+    width: 100%;
+  }
+
+  .beca-status {
+    align-self: flex-end;
   }
 }

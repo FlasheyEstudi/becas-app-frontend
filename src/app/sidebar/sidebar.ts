@@ -1,3 +1,4 @@
+// src/app/sidebar/sidebar.ts
 import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -27,31 +28,29 @@ export class SidebarComponent implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit() {
-    this.loadUserData();
+    this.updateUserData();
     this.buildMenu();
 
+    // Escuchar cambios de ruta para actualizar sidebar
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.currentRoute = event.urlAfterRedirects;
-        this.loadUserData();
+        this.updateUserData();
         this.buildMenu();
-
-        console.log('Rol actualizado en sidebar:', this.userRole);
       }
     });
   }
 
-  loadUserData() {
-    // Asegúrate que en localStorage el role esté guardado como 'admin' o 'estudiante'
-    this.userRole = localStorage.getItem('role') ?? 'estudiante';
-    this.userName = localStorage.getItem('username') ?? 'Usuario';
+  updateUserData() {
+    this.userRole = localStorage.getItem('role')?.toLowerCase() || 'estudiante';
+    this.userName = localStorage.getItem('username') || 'Usuario';
   }
 
   buildMenu() {
     this.menuItems = [
       { label: 'Dashboard', icon: '📊', route: '/dashboard', visible: true },
 
-      // Menú para administrador
+      // Menú Admin
       { label: 'Estudiantes', icon: '👥', route: '/estudiantes', visible: this.userRole === 'admin' },
       { label: 'Carreras', icon: '📚', route: '/carreras', visible: this.userRole === 'admin' },
       { label: 'Áreas', icon: '🧠', route: '/area-conocimiento', visible: this.userRole === 'admin' },
@@ -60,15 +59,9 @@ export class SidebarComponent implements OnInit {
       { label: 'Períodos', icon: '📅', route: '/periodo-academico', visible: this.userRole === 'admin' },
       { label: 'Solicitudes', icon: '📝', route: '/solicitud-beca', visible: this.userRole === 'admin' },
       { label: 'Estados', icon: '🔄', route: '/estado', visible: this.userRole === 'admin' },
-      { label: 'Detalles Requisitos', icon: '🔗', route: '/detalle-requisitos-beca', visible: this.userRole === 'admin' },
-      { label: 'Documentos', icon: '📄', route: '/documento', visible: this.userRole === 'admin' },
-      { label: 'Evaluaciones', icon: '📊', route: '/evaluacion', visible: this.userRole === 'admin' },
-      { label: 'Criterios', icon: '📏', route: '/criterio-evaluacion', visible: this.userRole === 'admin' },
-      { label: 'Detalles Evaluación', icon: '🔍', route: '/detalle-evaluacion', visible: this.userRole === 'admin' },
-      { label: 'Auditoría', icon: '🔍', route: '/auditoria', visible: this.userRole === 'admin' },
-      { label: 'Notificaciones', icon: '🔔', route: '/notificacion', visible: this.userRole === 'admin' },
+      { label: 'Configuración', icon: '⚙️', route: '/configuracion', visible: this.userRole === 'admin' },
 
-      // Menú para estudiante
+      // Menú Estudiante
       { label: 'Perfil', icon: '👤', route: '/perfil', visible: this.userRole === 'estudiante' },
       { label: 'Becas Disponibles', icon: '🎓', route: '/becas-disponibles', visible: this.userRole === 'estudiante' },
       { label: 'Mis Solicitudes', icon: '📝', route: '/mis-solicitudes', visible: this.userRole === 'estudiante' }
@@ -88,9 +81,7 @@ export class SidebarComponent implements OnInit {
   }
 
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('role');
-    this.router.navigate(['/login']);
+    localStorage.clear();
+    this.router.navigate(['/login']).then(() => window.location.reload());
   }
 }

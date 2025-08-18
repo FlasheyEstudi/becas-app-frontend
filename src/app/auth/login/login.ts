@@ -1,51 +1,80 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { AuthService } from '../auth';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './login.html',
-  styleUrls: ['./login.scss']
+  styleUrls: ['./login.scss'],
 })
 export class LoginComponent {
-  identifier = '';
-  password = '';
-  error = '';
+  correo: string = '';
+  password: string = '';
+  loading: boolean = false;
+  error: string = '';
+  isAdmin: boolean = false;
+  showPassword: boolean = false;
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  private authUrl = 'http://localhost:3000/api-beca/auth';
 
-  onSubmit() {
-    if (!this.identifier.trim()) {
-      this.error = 'El usuario o correo es requerido';
+  constructor(private http: HttpClient, private router: Router) {}
+
+  private getHeaders(): HttpHeaders {
+    return new HttpHeaders({ 'Content-Type': 'application/json' });
+  }
+
+  setRole(role: 'estudiante' | 'admin'): void {
+    this.isAdmin = role === 'admin';
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  login(form: NgForm): void {
+    if (form.invalid) {
+      this.error = 'Por favor, completa todos los campos';
       return;
     }
-    if (!this.password.trim()) {
-      this.error = 'La contraseña es requerida';
-      return;
-    }
-    const credentials = {
-      identifier: this.identifier,
-      password: this.password
-    };
-    
-    // Asegúrate de que el servicio de autenticación esté correctamente implementado
-    this.authService.login(credentials).subscribe({
-      next: (response) => {
-        // Asegúrate de que el token se guarda correctamente
-        console.log('Respuesta del login:', response);
-        this.router.navigate(['/dashboard']);
-      },
-      error: (err) => {
-        console.error('Error en login:', err);
-        this.error = 'Credenciales inválidas';
-      }
-    });
+
+    this.error = '';
+    this.loading = true;
+
+    const roleToSend = this.isAdmin ? 'admin' : 'estudiante';
+
+    this.http
+      .post<{ access_token: string; role: string; username?: string }>(
+        `${this.authUrl}/login`,
+        { identifier: this.correo, password: this.password, role: roleToSend },
+        { headers: this.getHeaders() }
+      )
+      .subscribe({
+        next: (res) => {
+          const role = res.role?.toLowerCase() || 'estudiante';
+          localStorage.setItem('token', res.access_token);
+          localStorage.setItem('role', role);
+          if (res.username) localStorage.setItem('username', res.username);
+
+          console.log('Usuario logueado:', res);
+
+          // Redirigir al dashboard general (RoleGuard manejará contenido)
+          this.router.navigate(['/dashboard']).then((success) => {
+            if (!success) {
+              console.error('No se pudo redirigir al dashboard');
+              this.error = 'Error al redirigir. Intenta de nuevo.';
+            }
+            this.loading = false;
+          });
+        },
+        error: (err) => {
+          console.error('Error login:', err);
+          this.error = err.error?.message || 'Correo, contraseña o rol incorrectos';
+          this.loading = false;
+        }
+      });
   }
 }

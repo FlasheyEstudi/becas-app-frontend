@@ -1,23 +1,81 @@
 <!-- src/app/estudiantes/estudiantes.html -->
 <div class="estudiantes-contenedor">
-  <h1 class="titulo-principal">Gestión de Estudiantes</h1>
-
   <!-- Mensajes de error -->
-  <div *ngIf="error" class="error-message">
+  <div *ngIf="error" class="form-group error-message">
     {{ error }}
   </div>
-
-  <!-- Modal de éxito con credenciales -->
-  <div *ngIf="showSuccessMessage" class="success-message" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <h3 id="modalTitle">¡Estudiante creado exitosamente!</h3>
-    <p><strong>Usuario:</strong> {{ credencialesEstudiante.username }}</p>
-    <p><strong>Correo:</strong> {{ credencialesEstudiante.email }}</p>
-    <p><strong>Contraseña:</strong> {{ credencialesEstudiante.password }}</p>
-    <p>Por favor, comparta estas credenciales con el estudiante.</p>
-    <button (click)="showSuccessMessage = false" aria-label="Cerrar mensaje de éxito">Cerrar</button>
+  
+  <!-- Modal de éxito -->
+  <div *ngIf="showSuccessMessage" class="modal-success">
+    <div class="modal-content">
+      <h3>Estudiante creado exitosamente</h3>
+      <p><strong>Usuario:</strong> {{ credencialesEstudiante.username }}</p>
+      <p><strong>Correo:</strong> {{ credencialesEstudiante.correo }}</p>
+      <p><strong>Contraseña temporal:</strong> {{ credencialesEstudiante.password }}</p>
+      <button type="button" (click)="showSuccessMessage = false">Cerrar</button>
+    </div>
   </div>
 
-  <!-- Carga de datos -->
+  <!-- Modal de registro -->
+  <div *ngIf="showModal" class="modal-overlay" (click)="cerrarModalRegistro()">
+    <div class="modal-registro" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Registrar Nuevo Estudiante</h3>
+        <button class="close-button" (click)="cerrarModalRegistro()">×</button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="onSubmitNewStudent()" #studentForm="ngForm">
+          <div class="form-group">
+            <label for="nombre">Nombre *</label>
+            <input type="text" id="nombre" [(ngModel)]="newStudent.nombre" name="nombre" required>
+          </div>
+          <div class="form-group">
+            <label for="apellidos">Apellidos *</label>
+            <input type="text" id="apellidos" [(ngModel)]="newStudent.apellidos" name="apellidos" required>
+          </div>
+          <div class="form-group">
+            <label for="correo">Correo Electrónico *</label>
+            <input type="email" id="correo" [(ngModel)]="newStudent.correo" name="correo" required>
+          </div>
+          <div class="form-group">
+            <label for="role">Rol</label>
+            <select id="role" [(ngModel)]="newStudent.role" name="role">
+              <option value="estudiante">Estudiante</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="estado">Estado</label>
+            <select id="estado" [(ngModel)]="newStudent.estadoId" name="estadoId">
+              <option [ngValue]="undefined">Seleccione estado</option>
+              <option *ngFor="let estado of estadosDisponibles" [value]="estado.id">
+                {{ estado.nombre }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="carrera">Carrera</label>
+            <select id="carrera" [(ngModel)]="newStudent.carreraId" name="carreraId">
+              <option [ngValue]="undefined">Seleccione carrera</option>
+              <option *ngFor="let carrera of carrerasDisponibles" [value]="carrera.id">
+                {{ carrera.nombre }}
+              </option>
+            </select>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primario" [disabled]="loading">
+              Registrar Estudiante
+            </button>
+            <button type="button" class="btn-secundario" (click)="cerrarModalRegistro()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay de carga -->
   <div *ngIf="loading" class="loading-overlay">
     <div class="spinner"></div>
   </div>
@@ -25,7 +83,7 @@
   <!-- KPIs -->
   <div class="kpi-grid">
     <div class="kpi-card">
-      <span class="kpi-icon">👥</span>
+      <span class="kpi-icon">👨‍🎓</span>
       <h2>{{ totalEstudiantes }}</h2>
       <p>Total Estudiantes</p>
     </div>
@@ -35,160 +93,43 @@
       <p>Estudiantes Activos</p>
     </div>
     <div class="kpi-card">
-      <span class="kpi-icon">👑</span>
+      <span class="kpi-icon">🛡️</span>
       <h2>{{ administradores }}</h2>
       <p>Administradores</p>
     </div>
-    <div class="kpi-card">
-      <span class="kpi-icon">📊</span>
-      <h2>{{ edadPromedio | number:'1.0-1' }} años</h2>
-      <p>Edad Promedio</p>
-    </div>
   </div>
 
-  <!-- Formulario para agregar nuevo estudiante -->
-  <div class="form-container">
-    <h2 class="subtitulo">Agregar Nuevo Estudiante</h2>
-    <form (ngSubmit)="onSubmitNewStudent()" #studentForm="ngForm" novalidate>
-      <div class="form-group">
-        <label for="nombre">Nombre *</label>
-        <input 
-          id="nombre"
-          type="text" 
-          class="form-control" 
-          [(ngModel)]="newStudent.nombre" 
-          name="nombre" 
-          required
-          #nombre="ngModel"
-        >
-        <div *ngIf="nombre.invalid && nombre.touched" class="error-message">Nombre es requerido</div>
-      </div>
-
-      <div class="form-group">
-        <label for="apellidos">Apellidos *</label>
-        <input 
-          id="apellidos"
-          type="text" 
-          class="form-control" 
-          [(ngModel)]="newStudent.apellidos" 
-          name="apellidos" 
-          required
-          #apellidos="ngModel"
-        >
-        <div *ngIf="apellidos.invalid && apellidos.touched" class="error-message">Apellidos son requeridos</div>
-      </div>
-
-      <div class="form-group">
-        <label for="email">Correo Electrónico *</label>
-        <input 
-          id="email"
-          type="email" 
-          class="form-control" 
-          [(ngModel)]="newStudent.email" 
-          name="email" 
-          required
-          #email="ngModel"
-        >
-        <div *ngIf="email.invalid && email.touched" class="error-message">Correo inválido</div>
-      </div>
-
-      <div class="form-group">
-        <label for="role">Rol</label>
-        <select 
-          id="role"
-          class="form-control" 
-          [(ngModel)]="newStudent.role" 
-          name="role">
-          <option value="estudiante">Estudiante</option>
-          <option value="admin">Administrador</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="estadoId">Estado</label>
-        <select 
-          id="estadoId"
-          class="form-control" 
-          [(ngModel)]="newStudent.estadoId" 
-          name="estadoId">
-          <option [ngValue]="null">Seleccionar estado</option>
-          <option *ngFor="let estado of estadosDisponibles" [value]="estado.id">
-            {{ estado.nombre }}
-          </option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="carreraId">Carrera</label>
-        <select 
-          id="carreraId"
-          class="form-control" 
-          [(ngModel)]="newStudent.carreraId" 
-          name="carreraId">
-          <option [ngValue]="null">Seleccionar carrera</option>
-          <option *ngFor="let carrera of carrerasDisponibles" [value]="carrera.id">
-            {{ carrera.nombre }}
-          </option>
-        </select>
-      </div>
-
-      <div class="form-actions">
-        <button 
-          type="submit" 
-          class="btn-primario"
-          [disabled]="loading || studentForm.invalid">
-          {{ loading ? 'Guardando...' : 'Registrar Estudiante' }}
-        </button>
-        <button 
-          type="button" 
-          class="btn-secundario"
-          (click)="resetFormulario()">
-          Limpiar
-        </button>
-      </div>
-    </form>
+  <!-- Botón de nuevo estudiante -->
+  <div class="boton-nuevo">
+    <button class="btn-nuevo" (click)="abrirModalRegistro()">
+      <span class="icono">+</span>
+      Nuevo Estudiante
+    </button>
   </div>
 
-  <!-- Filtros -->
+  <!-- Filtros de búsqueda -->
   <div class="search-filters">
-    <input 
-      type="text" 
-      class="search-input" 
-      placeholder="Buscar por nombre, apellido o correo"
-      [(ngModel)]="searchTerm" 
-      (input)="filtrarEstudiantes()">
-    
-    <select 
-      class="filter-select" 
-      [(ngModel)]="filtroEstado" 
-      (change)="filtrarEstudiantes()">
-      <option value="">Todos los Estados</option>
+    <input type="text" class="search-input" placeholder="Buscar..." [(ngModel)]="searchTerm" (input)="filtrarEstudiantes()">
+    <select class="filter-select" [(ngModel)]="filtroEstado" (change)="filtrarEstudiantes()">
+      <option value="">Todos los estados</option>
       <option *ngFor="let estado of estadosDisponibles" [value]="estado.id">
         {{ estado.nombre }}
       </option>
     </select>
-    
-    <select 
-      class="filter-select" 
-      [(ngModel)]="filtroCarrera" 
-      (change)="filtrarEstudiantes()">
-      <option value="">Todas las Carreras</option>
+    <select class="filter-select" [(ngModel)]="filtroCarrera" (change)="filtrarEstudiantes()">
+      <option value="">Todas las carreras</option>
       <option *ngFor="let carrera of carrerasDisponibles" [value]="carrera.id">
         {{ carrera.nombre }}
       </option>
     </select>
-    
-    <select 
-      class="filter-select" 
-      [(ngModel)]="filtroRol" 
-      (change)="filtrarEstudiantes()">
-      <option value="">Todos los Roles</option>
+    <select class="filter-select" [(ngModel)]="filtroRol" (change)="filtrarEstudiantes()">
+      <option value="">Todos los roles</option>
       <option value="estudiante">Estudiante</option>
       <option value="admin">Administrador</option>
     </select>
   </div>
 
-  <!-- Lista de estudiantes -->
+  <!-- Tabla de estudiantes -->
   <div class="table-responsive">
     <table class="table-modern">
       <thead>
@@ -206,29 +147,25 @@
       <tbody>
         <tr *ngFor="let estudiante of filteredEstudiantes">
           <td>{{ estudiante.nombre }}</td>
-          <td>{{ estudiante.apellidos || '-' }}</td>
+          <td>{{ estudiante.apellidos }}</td>
           <td>{{ estudiante.username || '-' }}</td>
-          <td>{{ estudiante.email }}</td>
+          <td>{{ estudiante.correo }}</td>
           <td>
-            <span class="badge" [ngClass]="{'badge-admin': estudiante.role === 'admin'}">
-              {{ estudiante.role }}
-            </span>
+            <span class="badge" [ngClass]="{
+              'badge-admin': estudiante.role === 'admin'
+            }">{{ estudiante.role }}</span>
           </td>
           <td>{{ getEstadoNombre(estudiante.estadoId) }}</td>
           <td>{{ getCarreraNombre(estudiante.carreraId) }}</td>
           <td class="actions-cell">
-            <button 
-              (click)="deleteEstudiante(estudiante.id)"
-              [disabled]="loading"
-              title="Eliminar">
+            <button (click)="deleteEstudiante(estudiante.id)" [disabled]="loading">
               🗑️
             </button>
           </td>
         </tr>
         <tr *ngIf="filteredEstudiantes.length === 0">
           <td colspan="8" class="no-results">
-            <i>👤</i>
-            <p>No hay estudiantes registrados</p>
+            No se encontraron estudiantes con los filtros aplicados
           </td>
         </tr>
       </tbody>

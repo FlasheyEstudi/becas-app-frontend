@@ -1,0 +1,385 @@
+<div class="configuracion-cont-selector">
+  <!-- Mensajes de error -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+  
+  <!-- Modal de éxito -->
+  <div *ngIf="showSuccessMessage" class="modal-success">
+    <div class="modal-content">
+      <h3>Operación completada</h3>
+      <p>{{ successMessage }}</p>
+      <button type="button" (click)="cerrarMensajeExito()">Cerrar</button>
+    </div>
+  </div>
+  
+  <!-- Overlay de carga -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+  
+  <!-- Encabezado -->
+  <header class="header-configuracion">
+    <h1>Configuración del Sistema</h1>
+    <p>Gestiona los catálogos y configuraciones básicas del sistema</p>
+  </header>
+  
+  <!-- Tabs de navegación -->
+  <nav class="config-tabs">
+    <button 
+      *ngFor="let tab of tabs" 
+      [class.active]="activeTab === tab.id"
+      (click)="cambiarPestana(tab.id)"
+    >
+      <span class="icon">{{ tab.icon }}</span>
+      {{ tab.label }}
+    </button>
+  </nav>
+  
+  <!-- Contenido de las tabs -->
+  <div class="tab-content">
+    <!-- Carreras -->
+    <div *ngIf="activeTab === 'carreras'" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <h2>Carreras</h2>
+          <p>{{ filteredCarreras.length }} elementos registrados</p>
+          <button class="btn-add" (click)="abrirModalCarrera()">
+            <span class="icon">+</span> Agregar
+          </button>
+        </div>
+        <div class="search-filters">
+          <input type="text" class="search-input" placeholder="Buscar..." [(ngModel)]="searchTerm" (input)="filtrarCarreras()"/>
+          <select class="filter-select" [(ngModel)]="filtroEstado" (change)="filtrarCarreras()">
+            <option value="">Todos los estados</option>
+            <option *ngFor="let estado of filteredEstados" [value]="estado.id">{{ estado.nombre }}</option>
+          </select>
+        </div>
+        <table class="table-modern">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Área</th>
+              <th>Fecha Creación</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let carrera of filteredCarreras">
+              <td>{{ carrera.nombre }}</td>
+              <td>{{ carrera.areaConocimiento?.nombre }}</td>
+              <td>{{ carrera.fechaCreacion | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'badge-active': carrera.estado?.nombre === 'Activa',
+                  'badge-inactive': carrera.estado?.nombre === 'Inactiva'
+                }">{{ carrera.estado?.nombre }}</span>
+              </td>
+              <td class="actions-cell">
+                <button class="btn-edit" (click)="editarCarrera(carrera)">
+                  <i class="material-icons">edit</i>
+                </button>
+                <button class="btn-delete" (click)="eliminarCarrera(carrera.id)">
+                  <i class="material-icons">delete</i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredCarreras.length === 0">
+              <td colspan="5" class="no-results">No se encontraron carreras</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Áreas de Conocimiento -->
+    <div *ngIf="activeTab === 'areas'" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <h2>Áreas de Conocimiento</h2>
+          <p>{{ filteredAreasConocimiento.length }} elementos registrados</p>
+          <button class="btn-add" (click)="abrirModalArea()">
+            <span class="icon">+</span> Agregar
+          </button>
+        </div>
+        <div class="search-filters">
+          <input type="text" class="search-input" placeholder="Buscar..." [(ngModel)]="searchTerm" (input)="filtrarAreasConocimiento()"/>
+        </div>
+        <table class="table-modern">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let area of filteredAreasConocimiento">
+              <td>{{ area.nombre }}</td>
+              <td class="actions-cell">
+                <button class="btn-edit" (click)="editarArea(area)">
+                  <i class="material-icons">edit</i>
+                </button>
+                <button class="btn-delete" (click)="eliminarArea(area.id)">
+                  <i class="material-icons">delete</i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredAreasConocimiento.length === 0">
+              <td colspan="2" class="no-results">No se encontraron áreas de conocimiento</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Requisitos -->
+    <div *ngIf="activeTab === 'requisitos'" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <h2>Requisitos</h2>
+          <p>{{ filteredRequisitos.length }} elementos registrados</p>
+          <button class="btn-add" (click)="abrirModalRequisito()">
+            <span class="icon">+</span> Agregar
+          </button>
+        </div>
+        <div class="search-filters">
+          <input type="text" class="search-input" placeholder="Buscar..." [(ngModel)]="searchTerm" (input)="filtrarRequisitos()"/>
+        </div>
+        <table class="table-modern">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Tipo</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let requisito of filteredRequisitos">
+              <td>{{ requisito.nombre }}</td>
+              <td>{{ requisito.descripcion }}</td>
+              <td>{{ requisito.tipo }}</td>
+              <td class="actions-cell">
+                <button class="btn-edit" (click)="editarRequisito(requisito)">
+                  <i class="material-icons">edit</i>
+                </button>
+                <button class="btn-delete" (click)="eliminarRequisito(requisito.id)">
+                  <i class="material-icons">delete</i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredRequisitos.length === 0">
+              <td colspan="4" class="no-results">No se encontraron requisitos</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Períodos Académicos -->
+    <div *ngIf="activeTab === 'periodos'" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <h2>Períodos Académicos</h2>
+          <p>{{ filteredPeriodosAcademicos.length }} elementos registrados</p>
+          <button class="btn-add" (click)="abrirModalPeriodo()">
+            <span class="icon">+</span> Agregar
+          </button>
+        </div>
+        <div class="search-filters">
+          <input type="text" class="search-input" placeholder="Buscar..." [(ngModel)]="searchTerm" (input)="filtrarPeriodosAcademicos()"/>
+          <select class="filter-select" [(ngModel)]="filtroEstado" (change)="filtrarPeriodosAcademicos()">
+            <option value="">Todos los estados</option>
+            <option *ngFor="let estado of filteredEstados" [value]="estado.id">{{ estado.nombre }}</option>
+          </select>
+        </div>
+        <table class="table-modern">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Fecha Inicio</th>
+              <th>Fecha Fin</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let periodo of filteredPeriodosAcademicos">
+              <td>{{ periodo.nombre }}</td>
+              <td>{{ periodo.fechaInicio | date:'dd/MM/yyyy' }}</td>
+              <td>{{ periodo.fechaFin | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'badge-active': periodo.estado?.nombre === 'Activo',
+                  'badge-inactive': periodo.estado?.nombre === 'Inactivo'
+                }">{{ periodo.estado?.nombre }}</span>
+              </td>
+              <td class="actions-cell">
+                <button class="btn-edit" (click)="editarPeriodo(periodo)">
+                  <i class="material-icons">edit</i>
+                </button>
+                <button class="btn-delete" (click)="eliminarPeriodo(periodo.id)">
+                  <i class="material-icons">delete</i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredPeriodosAcademicos.length === 0">
+              <td colspan="5" class="no-results">No se encontraron períodos académicos</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Estados -->
+    <div *ngIf="activeTab === 'estados'" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <h2>Estados</h2>
+          <p>{{ filteredEstados.length }} elementos registrados</p>
+          <button class="btn-add" (click)="abrirModalEstado()">
+            <span class="icon">+</span> Agregar
+          </button>
+        </div>
+        <table class="table-modern">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let estado of filteredEstados">
+              <td>{{ estado.nombre }}</td>
+              <td class="actions-cell">
+                <button class="btn-edit" (click)="editarEstado(estado)">
+                  <i class="material-icons">edit</i>
+                </button>
+                <button class="btn-delete" (click)="eliminarEstado(estado.id)">
+                  <i class="material-icons">delete</i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredEstados.length === 0">
+              <td colspan="2" class="no-results">No se encontraron estados</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Carrera -->
+  <div *ngIf="showCarreraModal" class="modal-success">
+    <div class="modal-content">
+      <h3>{{ editingCarrera ? 'Editar Carrera' : 'Nueva Carrera' }}</h3>
+      <div class="form-group">
+        <label>Nombre:</label>
+        <input type="text" [(ngModel)]="newCarrera.nombre" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label>Área de Conocimiento:</label>
+        <select [(ngModel)]="newCarrera.areaConocimientoId" class="form-control">
+          <option value="">Seleccionar área</option>
+          <option *ngFor="let area of areasConocimiento" [value]="area.id">{{ area.nombre }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Estado:</label>
+        <select [(ngModel)]="newCarrera.estadoId" class="form-control">
+          <option *ngFor="let estado of estados" [value]="estado.id">{{ estado.nombre }}</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" (click)="guardarCarrera()" class="btn btn-primary">Guardar</button>
+        <button type="button" (click)="cerrarModales()" class="btn btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Área -->
+  <div *ngIf="showAreaModal" class="modal-success">
+    <div class="modal-content">
+      <h3>{{ editingArea ? 'Editar Área de Conocimiento' : 'Nueva Área de Conocimiento' }}</h3>
+      <div class="form-group">
+        <label>Nombre:</label>
+        <input type="text" [(ngModel)]="newAreaConocimiento.nombre" class="form-control" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" (click)="guardarArea()" class="btn btn-primary">Guardar</button>
+        <button type="button" (click)="cerrarModales()" class="btn btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Requisito -->
+  <div *ngIf="showRequisitoModal" class="modal-success">
+    <div class="modal-content">
+      <h3>{{ editingRequisito ? 'Editar Requisito' : 'Nuevo Requisito' }}</h3>
+      <div class="form-group">
+        <label>Nombre:</label>
+        <input type="text" [(ngModel)]="newRequisito.nombre" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label>Descripción:</label>
+        <textarea [(ngModel)]="newRequisito.descripcion" class="form-control"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Tipo:</label>
+        <select [(ngModel)]="newRequisito.tipo" class="form-control">
+          <option value="academico">Académico</option>
+          <option value="personal">Personal</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" (click)="guardarRequisito()" class="btn btn-primary">Guardar</button>
+        <button type="button" (click)="cerrarModales()" class="btn btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Período -->
+  <div *ngIf="showPeriodoModal" class="modal-success">
+    <div class="modal-content">
+      <h3>{{ editingPeriodo ? 'Editar Período Académico' : 'Nuevo Período Académico' }}</h3>
+      <div class="form-group">
+        <label>Nombre:</label>
+        <input type="text" [(ngModel)]="newPeriodoAcademico.nombre" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label>Fecha Inicio:</label>
+        <input type="date" [(ngModel)]="newPeriodoAcademico.fechaInicio" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label>Fecha Fin:</label>
+        <input type="date" [(ngModel)]="newPeriodoAcademico.fechaFin" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label>Estado:</label>
+        <select [(ngModel)]="newPeriodoAcademico.estadoId" class="form-control">
+          <option *ngFor="let estado of estados" [value]="estado.id">{{ estado.nombre }}</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" (click)="guardarPeriodo()" class="btn btn-primary">Guardar</button>
+        <button type="button" (click)="cerrarModales()" class="btn btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Estado -->
+  <div *ngIf="showEstadoModal" class="modal-success">
+    <div class="modal-content">
+      <h3>{{ editingEstado ? 'Editar Estado' : 'Nuevo Estado' }}</h3>
+      <div class="form-group">
+        <label>Nombre:</label>
+        <input type="text" [(ngModel)]="newEstado.nombre" class="form-control" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" (click)="guardarEstado()" class="btn btn-primary">Guardar</button>
+        <button type="button" (click)="cerrarModales()" class="btn btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,62 +1,84 @@
-/* Variables CSS globales para tema claro */
+/* ===========================================================
+   Variables CSS globales para tema claro / dark
+   =========================================================== */
+
 :root {
-  --bg-start: #14c9a8;
-  --bg-end: #0fb0d5;
-  --text-color: rgba(255, 255, 255, 0.9);
-  --card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
-  --card-shadow: 0 15px 30px rgba(8, 30, 40, 0.12);
-  --input-bg: rgba(255, 255, 255, 0.06);
-  --input-border: rgba(255, 255, 255, 0.06);
-  --btn-primary-bg: linear-gradient(90deg, #3dd8bd 0%, #00b4d8 100%);
-  --btn-primary-hover-bg: linear-gradient(90deg, #32c9af 0%, #009dd5 100%);
-  --btn-secondary-bg: rgba(255, 255, 255, 0.12);
-  --btn-secondary-hover-bg: rgba(255, 255, 255, 0.18);
-  --btn-danger-bg: #e53e3e;
-  --btn-danger-hover-bg: #c53030;
-  --table-bg: rgba(255, 255, 255, 0.06);
-  --table-header-bg: #00b4d8;
-  --table-header-color: white;
-  --table-row-even-bg: rgba(255, 255, 255, 0.03);
-  --table-row-hover-bg: #3dd8bd;
-  --alert-bg-error: rgba(255, 0, 0, 0.05);
-  --alert-bg-success: rgba(0, 200, 150, 0.15);
-  --alert-text-color: white;
-  --navbar-bg: linear-gradient(135deg, #14c9a8 0%, #10b2d8 50%, #0fb0d5 100%);
-  --navbar-text-color: white;
-  --nav-link-bg: rgba(255, 255, 255, 0.06);
-  --nav-link-color: rgba(255, 255, 255, 0.9);
-  --nav-link-hover-bg: rgba(255, 255, 255, 0.12);
-  --nav-link-hover-color: white;
-  --btn-logout-bg: #EA4C5D;
-  --btn-logout-hover-bg: #d32f2f;
-  --body-bg: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+  --font-size: 14px;
+
+  /* Colores generales */
+  --background: #ffffff;
+  --foreground: oklch(0.145 0 0);
+  --card: #ffffff;
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+
+  /* Colores primarios y secundarios */
+  --primary: #030213;
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.95 0.0058 264.53);
+  --secondary-foreground: #030213;
+
+  /* Colores para estados y acentos */
+  --muted: #ececf0;
+  --muted-foreground: #717182;
+  --accent: #e9ebef;
+  --accent-foreground: #030213;
+  --destructive: #d4183d;
+  --destructive-foreground: #ffffff;
+
+  /* Bordes, inputs y switches */
+  --border: rgba(0, 0, 0, 0.1);
+  --input: transparent;
+  --input-background: #f3f3f5;
+  --switch-background: #cbced4;
+
+  /* Tipografía */
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+
+  /* Charts */
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+
+  /* Radius */
+  --radius: 0.625rem;
+
+  /* Sidebar */
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: #030213;
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
-/* Body con fondo gradiente fijo y cubriendo todo */
+/* ===========================================================
+   Base Styles
+   =========================================================== */
 body {
-  background: var(--body-bg);
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-size: cover;
-  color: var(--text-color);
+  background: var(--background);
+  color: var(--foreground);
   font-family: 'Poppins', sans-serif;
   min-height: 100vh;
   margin: 0;
   transition: background 0.3s ease, color 0.3s ease;
-  overflow-x: hidden; /* Evita scroll horizontal */
+  overflow-x: hidden;
 }
 
-/* Navbar */
 .navbar {
-  background: var(--navbar-bg);
-  color: var(--navbar-text-color);
+  background: var(--sidebar-primary);
+  color: var(--sidebar-primary-foreground);
   padding: 1rem 0;
-  box-shadow: var(--card-shadow);
+  box-shadow: 0 15px 30px rgba(8, 30, 40, 0.12);
   position: sticky;
   top: 0;
   z-index: 1000;
-  transition: background 0.3s ease, color 0.3s ease;
-  overflow-x: hidden; /* Evitar scroll horizontal en navbar */
 }
 
 .nav-container {
@@ -67,18 +89,13 @@ body {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  box-sizing: border-box;
-  width: 100%;
 }
 
 .nav-logo {
   font-size: 1.6rem;
   font-weight: 600;
   text-decoration: none;
-  color: var(--navbar-text-color);
-  font-family: 'Poppins', sans-serif;
-  transition: color 0.3s ease;
-  white-space: nowrap;
+  color: var(--sidebar-primary-foreground);
 }
 
 .menu-toggle {
@@ -86,9 +103,8 @@ body {
   font-size: 1.5rem;
   background: none;
   border: none;
-  color: var(--navbar-text-color);
+  color: var(--sidebar-primary-foreground);
   cursor: pointer;
-  transition: color 0.3s ease;
 }
 
 .nav-menu {
@@ -100,9 +116,6 @@ body {
   padding: 0;
   margin: 1rem 0 0;
   justify-content: flex-end;
-  max-width: 100%;
-  box-sizing: border-box;
-  overflow-x: hidden;
 }
 
 .nav-item {
@@ -115,19 +128,17 @@ body {
     display: block;
     width: 100%;
     text-decoration: none;
-    background-color: var(--nav-link-bg);
-    color: var(--nav-link-color);
+    background-color: var(--card);
+    color: var(--card-foreground);
     font-size: 0.95rem;
     font-weight: 500;
     padding: 0.5rem 1rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
-    white-space: nowrap;
 
     &:hover {
-      background-color: var(--nav-link-hover-bg);
-      color: var(--nav-link-hover-color);
+      background-color: var(--accent);
+      color: var(--accent-foreground);
       transform: translateY(-2px);
     }
   }
@@ -137,24 +148,23 @@ body {
   flex: 1 1 130px;
   min-width: 130px;
   max-width: 180px;
-  background-color: var(--btn-logout-bg);
-  color: white;
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
   border: none;
   padding: 0.5rem 1.2rem;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
   transition: background-color 0.3s, transform 0.2s;
-  box-shadow: var(--card-shadow);
-  white-space: nowrap;
 
   &:hover {
-    background-color: var(--btn-logout-hover-bg);
+    background-color: var(--destructive-foreground);
+    color: var(--destructive);
     transform: translateY(-2px);
   }
 }
 
-/* Responsive para navbar */
+/* Responsive */
 @media (max-width: 768px) {
   .menu-toggle {
     display: block;
@@ -174,14 +184,48 @@ body {
   .btn-logout {
     flex: none;
     width: 100%;
-    max-width: none;
   }
 }
 
-/* Reset básicos */
-html,
-body {
-  height: 100%;
-  margin: 0;
-  font-family: 'Roboto', "Helvetica Neue", sans-serif;
+/* Inputs y formularios */
+input, select, textarea {
+  background: var(--input-background);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  padding: 0.5rem 0.8rem;
+  border-radius: var(--radius);
+  font-size: var(--font-size);
+  font-weight: var(--font-weight-normal);
+  transition: border 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* Tablas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  color: var(--card-foreground);
+}
+
+th, td {
+  padding: 0.8rem 1rem;
+  text-align: left;
+}
+
+th {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+tr:nth-child(even) {
+  background: var(--muted);
+}
+
+tr:hover {
+  background: var(--accent);
 }

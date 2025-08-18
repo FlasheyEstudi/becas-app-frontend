@@ -19,33 +19,13 @@
       <div class="formulario-solicitud">
         <h4>Datos de solicitud</h4>
         <form (ngSubmit)="onSubmit()" #solicitudForm="ngForm">
-          <div class="form-group">
-            <label>Estudiante</label>
-            <input
-              type="text"
-              [value]="solicitudFormModel.estudianteId"
-              readonly
-              placeholder="ID del estudiante"
-            />
-          </div>
-
-          <div class="form-group">
-            <label>Tipo de Beca</label>
-            <input
-              type="text"
-              [value]="solicitudFormModel.tipoBecaId"
-              readonly
-              placeholder="ID del tipo de beca"
-            />
-          </div>
+          <!-- Campos ocultos -->
+          <input type="hidden" [(ngModel)]="solicitudFormModel.estudianteId" name="estudianteId" [ngModelOptions]="{ standalone: true }" />
+          <input type="hidden" [(ngModel)]="solicitudFormModel.tipoBecaId" name="tipoBecaId" [ngModelOptions]="{ standalone: true }" />
 
           <div class="form-group">
             <label>Estado</label>
-            <input
-              type="text"
-              value="Pendiente"
-              readonly
-            />
+            <input type="text" value="Pendiente" readonly />
           </div>
 
           <div class="form-group">
@@ -61,14 +41,17 @@
 
           <div class="form-group">
             <label>Período Académico *</label>
-            <input
-              type="number"
+            <select
               [(ngModel)]="solicitudFormModel.periodoAcademicoId"
               name="periodoAcademicoId"
               [ngModelOptions]="{ standalone: true }"
               required
-              placeholder="ID del período académico"
-            />
+            >
+              <option value="">Seleccione un período</option>
+              <option *ngFor="let periodo of periodosAcademicos" [value]="periodo.id">
+                {{ periodo.nombre }}
+              </option>
+            </select>
           </div>
 
           <div class="form-group">

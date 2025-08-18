@@ -18,7 +18,11 @@
     <tbody>
       <tr *ngFor="let solicitud of solicitudes; let i = index">
         <td>{{ i + 1 }}</td>
-        <td>{{ solicitud.estudiante.nombreCompleto || 'Desconocido' }}</td>
+        <td>
+          {{ solicitud.estudiante.nombreCompleto || 
+             (solicitud.estudiante.nombre + ' ' + (solicitud.estudiante.apellidos || '')) || 
+             'Desconocido' }}
+        </td>
         <td>{{ solicitud.tipoBeca.nombre || 'Sin nombre' }}</td>
         <td>{{ solicitud.fechaSolicitud | date:'dd/MM/yyyy' }}</td>
         <td>

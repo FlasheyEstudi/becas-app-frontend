@@ -30,6 +30,14 @@
     </div>
   </section>
 
+  <!-- Gráfico de solicitudes por tipo de beca -->
+  <section class="chart-section">
+    <div class="chart-card">
+      <h3>Solicitudes por Tipo de Beca</h3>
+      <canvas id="tipoBecaChart"></canvas>
+    </div>
+  </section>
+
   <!-- Tabla de solicitudes pendientes con datos reales -->
   <section class="quick-table">
     <h3>Solicitudes Pendientes</h3>
@@ -43,7 +51,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor  ="let request of pendingRequests">
+        <tr *ngFor="let request of pendingRequests">
           <td>{{ request.estudiante }}</td>
           <td>{{ request.tipo }}</td>
           <td>{{ request.fecha }}</td>

@@ -1,59 +1,45 @@
-<div class="perfil-container">
-  <h2>Perfil de Estudiante</h2>
+<!-- src/app/estudiantes/perfil/perfil.html -->
+<div class="perfil-contenedor" *ngIf="estudiante; else loadingOrError">
+  <h1>Perfil de Estudiante</h1>
 
-  <div *ngIf="loading">Cargando perfil...</div>
-  <div *ngIf="error" class="error">{{ error }}</div>
-
-  <div *ngIf="estudiante">
+  <!-- Información personal -->
+  <div class="info-seccion">
+    <h2>Información Personal</h2>
     <p><strong>Nombre:</strong> {{ estudiante.nombre }} {{ estudiante.apellidos }}</p>
     <p><strong>Correo:</strong> {{ estudiante.correo }}</p>
-    <p><strong>Edad:</strong> {{ estudiante.edad }}</p>
-    <!-- Más campos de perfil que quieras mostrar -->
+    <p><strong>Rol:</strong> {{ estudiante.role }}</p>
+    <p><strong>Estado:</strong> {{ getEstadoNombre(estudiante.estadoId) }}</p>
+    <p><strong>Carrera:</strong> {{ getCarreraNombre(estudiante.carreraId) }}</p>
   </div>
 
-  <hr />
-
-  <h3>Cambiar Contraseña</h3>
-
-  <form (ngSubmit)="cambiarContrasena()" #passwordForm="ngForm" novalidate>
-    <div>
-      <label for="currentPassword">Contraseña actual</label>
-      <input
-        id="currentPassword"
-        name="currentPassword"
-        type="password"
-        [(ngModel)]="currentPassword"
-        required
-      />
-    </div>
-
-    <div>
-      <label for="newPassword">Nueva contraseña</label>
-      <input
-        id="newPassword"
-        name="newPassword"
-        type="password"
-        [(ngModel)]="newPassword"
-        required
-        minlength="6"
-      />
-    </div>
-
-    <div>
-      <label for="confirmPassword">Confirmar nueva contraseña</label>
-      <input
-        id="confirmPassword"
-        name="confirmPassword"
-        type="password"
-        [(ngModel)]="confirmPassword"
-        required
-        minlength="6"
-      />
-    </div>
-
-    <button type="submit" [disabled]="changingPassword">Cambiar Contraseña</button>
-
+  <!-- Cambiar contraseña -->
+  <div class="password-seccion">
+    <h2>Cambiar Contraseña</h2>
     <div *ngIf="passwordChangeMessage" class="success">{{ passwordChangeMessage }}</div>
     <div *ngIf="passwordChangeError" class="error">{{ passwordChangeError }}</div>
-  </form>
+
+    <form (ngSubmit)="cambiarContrasena()">
+      <div class="form-group">
+        <label for="currentPassword">Contraseña actual</label>
+        <input id="currentPassword" type="password" [(ngModel)]="currentPassword" name="currentPassword" required>
+      </div>
+
+      <div class="form-group">
+        <label for="newPassword">Nueva contraseña</label>
+        <input id="newPassword" type="password" [(ngModel)]="newPassword" name="newPassword" required>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirmar nueva contraseña</label>
+        <input id="confirmPassword" type="password" [(ngModel)]="confirmPassword" name="confirmPassword" required>
+      </div>
+
+      <button type="submit" [disabled]="changingPassword">{{ changingPassword ? 'Cambiando...' : 'Cambiar contraseña' }}</button>
+    </form>
+  </div>
 </div>
+
+<ng-template #loadingOrError>
+  <div *ngIf="loading" class="loading">Cargando perfil...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+</ng-template>
