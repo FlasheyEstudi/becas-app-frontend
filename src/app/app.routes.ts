@@ -1,3 +1,4 @@
+// src/app/app.routes.ts
 import { Routes } from '@angular/router';
 
 import { LoginComponent } from './auth/login/login';
@@ -28,6 +29,7 @@ import { BecasDisponiblesComponent } from './estudiantes/becas-disponibles/becas
 import { MisSolicitudesComponent } from './estudiantes/mis-solicitudes/mis-solicitudes';
 import { BecaDetalleComponent } from './estudiantes/beca-detalle/beca-detalle';
 import { ConfiguracionComponent } from './configuracion/configuracion';
+import { ReportesComponent } from './reportes/reportes'; // Nueva línea
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -58,6 +60,10 @@ export const routes: Routes = [
   { path: 'notificacion', component: NotificacionComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
   { path: 'auditoria', component: AuditoriaComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
   { path: 'configuracion', component: ConfiguracionComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } },
+  
+  // Ruta para reportes
+  { path: 'reportes', component: ReportesComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] } }, // Solo admin
+
   // Rutas solo estudiante
   { path: 'perfil', component: PerfilComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['estudiante'] } },
   { path: 'becas-disponibles', component: BecasDisponiblesComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['estudiante'] } },

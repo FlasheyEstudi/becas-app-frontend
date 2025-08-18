@@ -1,65 +1,68 @@
 <div class="tipo-beca-contenedor">
   <h2 class="titulo-principal">Tipos de Beca</h2>
 
-  <!-- Mensaje de error si existe -->
-  <div *ngIf="error" class="alerta">{{ error }}</div>
-
-  <!-- Indicador de carga -->
-  <div *ngIf="loading" class="loading">
-    Cargando...
+  <!-- Métricas -->
+  <div class="metrics-container">
+    <div class="metric-card blue">
+      <div class="icon"><i class="icon-tag"></i></div>
+      <div class="value">{{ tiposBeca.length }}</div>
+      <div class="label">Categorías Configuradas</div>
+    </div>
+    <div class="metric-card green">
+      <div class="icon"><i class="icon-user"></i></div>
+      <div class="value">{{ totalBeneficiarios }}</div>
+      <div class="label">Beneficiarios Activos</div>
+    </div>
+    <div class="metric-card red">
+      <div class="icon"><i class="icon-dollar"></i></div>
+      <div class="value">C${{ presupuestoTotal | number:'1.0-0' }}.00</div>
+      <div class="label">Presupuesto Total</div>
+    </div>
+    <div class="metric-card purple">
+      <div class="icon"><i class="icon-chart"></i></div>
+      <div class="value">{{ activasCount }}<br>de {{ tiposBeca.length }}</div>
+      <div class="label">Categorías Activas</div>
+    </div>
   </div>
+
+  <!-- Mensajes -->
+  <div *ngIf="error" class="alerta">{{ error }}</div>
+  <div *ngIf="successMessage" class="alerta-success">{{ successMessage }}</div>
+  <div *ngIf="loading" class="loading">Cargando...</div>
 
   <!-- Buscador -->
   <div class="search-container">
-    <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()" placeholder="Buscar por nombre..."
-      class="search-input" />
+    <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()" placeholder="Buscar por nombre..." class="search-input" />
   </div>
 
-  <!-- Formulario para añadir tipo de beca -->
+  <!-- Formulario nuevo tipo de beca -->
   <div class="form-container">
     <h3 class="subtitulo">Añadir Nuevo Tipo de Beca</h3>
     <form (ngSubmit)="onSubmitNewTipoBeca()" #tipoBecaForm="ngForm">
       <div class="form-group">
-        <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" name="nombre" [(ngModel)]="newTipoBeca.nombre"
-          placeholder="Nombre del tipo de beca" required />
+        <label>Nombre:</label>
+        <input type="text" [(ngModel)]="newTipoBeca.nombre" name="nombre" required />
       </div>
-
       <div class="form-group">
-        <label for="descripcion">Descripción:</label>
-        <textarea id="descripcion" name="descripcion" [(ngModel)]="newTipoBeca.descripcion"
-          placeholder="Descripción del tipo de beca" required class="form-textarea"></textarea>
+        <label>Descripción:</label>
+        <textarea [(ngModel)]="newTipoBeca.descripcion" name="descripcion" required></textarea>
       </div>
-
       <div class="form-group">
-        <label for="monto">Monto:</label>
-        <input type="number" id="monto" name="monto" [(ngModel)]="newTipoBeca.monto" placeholder="Monto de la beca"
-          required min="0" step="0.01" />
+        <label>Monto:</label>
+        <input type="number" [(ngModel)]="newTipoBeca.monto" name="monto" required min="0" step="0.01" />
       </div>
-
       <div class="form-group">
-        <label for="estadoId">ID Estado:</label>
-        <input type="number" id="estadoId" name="estadoId" [(ngModel)]="newTipoBeca.estadoId"
-          placeholder="ID del estado" required min="1" />
+        <label>ID Estado:</label>
+        <input type="number" [(ngModel)]="newTipoBeca.estadoId" name="estadoId" required min="1" />
       </div>
-
       <div class="form-actions">
-        <button type="submit" [disabled]="loading" class="btn-primario">
-          Añadir Tipo de Beca
-        </button>
-        <button type="button" (click)="onCancel()" class="btn-secundario">
-          Cancelar
-        </button>
+        <button type="submit" class="btn-primario" [disabled]="loading">Añadir Tipo de Beca</button>
+        <button type="button" class="btn-secundario" (click)="onCancel()">Cancelar</button>
       </div>
     </form>
   </div>
 
-  <!-- Botón para recargar -->
-  <button class="btn btn-primario mb-3" (click)="cargarTiposBeca()" [disabled]="loading">
-    Recargar Lista
-  </button>
-
-  <!-- Tabla de tipos de beca -->
+  <!-- Tabla -->
   <table class="tabla" *ngIf="!loading && filteredTiposBeca.length > 0">
     <thead>
       <tr>
@@ -76,24 +79,55 @@
         <td>{{ tipoBeca.id }}</td>
         <td>{{ tipoBeca.nombre }}</td>
         <td>{{ tipoBeca.descripcion }}</td>
-        <td>{{ tipoBeca.monto | currency:'USD':'symbol':'1.2-2' }}</td>
+        <td>{{ tipoBeca.monto | currency:'NIO':'symbol':'1.2-2' }}</td>
         <td>{{ tipoBeca.estadoId }}</td>
-        <td>
-          <button (click)="deleteTipoBeca(tipoBeca.id)" class="btn-danger btn-sm">
-            Eliminar
-          </button>
+        <td class="action-icons">
+          <button (click)="openEditModal(tipoBeca)" class="edit-btn"><i class="icon-edit"></i></button>
+          <button (click)="deleteTipoBeca(tipoBeca.id)" class="delete-btn"><i class="icon-delete"></i></button>
         </td>
       </tr>
     </tbody>
   </table>
 
-  <!-- Mensaje si no hay tipos de beca -->
   <p *ngIf="filteredTiposBeca.length === 0 && !loading && !error" class="texto-centro">
     No hay tipos de beca que coincidan con la búsqueda.
   </p>
 
-  <!-- Mensaje si no hay tipos de beca en la base de datos -->
   <p *ngIf="tiposBeca.length === 0 && !loading && !error" class="texto-centro">
     No hay tipos de beca registrados en el sistema.
   </p>
+
+  <!-- Modal edición -->
+  <div *ngIf="selectedTipoBeca" class="modal-overlay" (click)="closeEditModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Editar Tipo de Beca</h2>
+        <button class="modal-close" (click)="closeEditModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form #editForm="ngForm">
+          <div class="form-group">
+            <label>Nombre:</label>
+            <input type="text" [(ngModel)]="selectedTipoBeca.nombre" name="editNombre" required />
+          </div>
+          <div class="form-group">
+            <label>Descripción:</label>
+            <textarea [(ngModel)]="selectedTipoBeca.descripcion" name="editDescripcion" required></textarea>
+          </div>
+          <div class="form-group">
+            <label>Monto:</label>
+            <input type="number" [(ngModel)]="selectedTipoBeca.monto" name="editMonto" required min="0" />
+          </div>
+          <div class="form-group">
+            <label>ID Estado:</label>
+            <input type="number" [(ngModel)]="selectedTipoBeca.estadoId" name="editEstadoId" required min="1" />
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-primario" (click)="saveEditedTipoBeca()" [disabled]="loading">Guardar Cambios</button>
+            <button type="button" class="btn-secundario" (click)="closeEditModal()">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

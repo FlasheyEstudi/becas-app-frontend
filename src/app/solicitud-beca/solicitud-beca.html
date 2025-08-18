@@ -1,3 +1,4 @@
+<!-- src/app/solicitud-beca/solicitud-beca.html -->
 <div class="solicitud-beca-contenedor">
   <h2 class="titulo-principal">Solicitudes de Beca</h2>
 
@@ -5,103 +6,89 @@
   <div *ngIf="error" class="alerta">{{ error }}</div>
 
   <!-- Indicador de carga -->
-  <div *ngIf="loading" class="loading">Cargando...</div>
+  <div *ngIf="loading" class="loading">
+    Cargando...
+  </div>
 
   <!-- Buscador -->
   <div class="search-container">
-    <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()"
-      placeholder="Buscar por observaciones, estudiante, tipo de beca..." class="search-input" />
+    <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()" placeholder="Buscar por nombre, apellido, tipo de beca, estado..."
+      class="search-input" />
   </div>
 
-  <!-- Formulario para añadir solicitud de beca -->
+  <!-- Botón para abrir modal de nuevo tipo de beca -->
+  <div class="form-actions" style="margin-bottom: 2rem; text-align: center;">
+    <button class="btn-primario" (click)="openCreateTipoBecaModal()">
+      <i class="icon-plus"></i> Añadir Nuevo Tipo de Beca
+    </button>
+  </div>
+
+  <!-- Formulario para nueva solicitud -->
   <div class="form-container">
-    <h3 class="subtitulo">Añadir Nueva Solicitud de Beca</h3>
-    <form (ngSubmit)="onSubmitNewSolicitud(solicitudForm)" #solicitudForm="ngForm">
+    <h3 class="subtitulo">Nueva Solicitud de Beca</h3>
+    <form (ngSubmit)="onSubmitNewSolicitud(newSolicitudForm)" #newSolicitudForm="ngForm">
       <div class="form-group">
-        <label for="estudianteId">ID Estudiante:</label>
-        <input type="number" id="estudianteId" name="estudianteId" [(ngModel)]="newSolicitud.estudianteId"
-          placeholder="ID del estudiante" required min="1" />
+        <label for="tipoBecaId">Tipo de Beca:</label>
+        <select id="tipoBecaId" name="tipoBecaId" [(ngModel)]="newSolicitud.tipoBecaId" required>
+          <option value="">Seleccionar tipo de beca</option>
+          <option *ngFor="let tipo of tiposBeca" [value]="tipo.id">{{ tipo.nombre }}</option>
+        </select>
       </div>
 
       <div class="form-group">
-        <label for="tipoBecaId">ID Tipo de Beca:</label>
-        <input type="number" id="tipoBecaId" name="tipoBecaId" [(ngModel)]="newSolicitud.tipoBecaId"
-          placeholder="ID del tipo de beca" required min="1" />
-      </div>
-
-      <div class="form-group">
-        <label for="estadoId">ID Estado:</label>
-        <input type="number" id="estadoId" name="estadoId" [(ngModel)]="newSolicitud.estadoId"
-          placeholder="ID del estado" required min="1" />
+        <label for="periodoAcademicoId">Período Académico:</label>
+        <select id="periodoAcademicoId" name="periodoAcademicoId" [(ngModel)]="newSolicitud.periodoAcademicoId" required>
+          <option value="">Seleccionar período</option>
+          <option *ngFor="let periodo of periodosAcademicos" [value]="periodo.id">{{ periodo.nombre }}</option>
+        </select>
       </div>
 
       <div class="form-group">
         <label for="fechaSolicitud">Fecha de Solicitud:</label>
-        <input type="date" id="fechaSolicitud" name="fechaSolicitud" [(ngModel)]="newSolicitud.fechaSolicitud"
-          required />
-      </div>
-
-      <div class="form-group">
-        <label for="periodoAcademicoId">ID Período Académico:</label>
-        <input type="number" id="periodoAcademicoId" name="periodoAcademicoId"
-          [(ngModel)]="newSolicitud.periodoAcademicoId" placeholder="ID del período académico" required min="1" />
+        <input type="date" id="fechaSolicitud" name="fechaSolicitud" [(ngModel)]="newSolicitud.fechaSolicitud" required />
       </div>
 
       <div class="form-group">
         <label for="observaciones">Observaciones:</label>
-        <textarea id="observaciones" name="observaciones" [(ngModel)]="newSolicitud.observaciones"
-          placeholder="Observaciones de la solicitud" class="form-textarea"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="fechaResultado">Fecha de Resultado:</label>
-        <input type="date" id="fechaResultado" name="fechaResultado" [(ngModel)]="newSolicitud.fechaResultado" />
+        <textarea id="observaciones" name="observaciones" [(ngModel)]="newSolicitud.observaciones" 
+          placeholder="Observaciones adicionales"></textarea>
       </div>
 
       <div class="form-actions">
         <button type="submit" [disabled]="loading" class="btn-primario">
-          Añadir Solicitud
+          <i class="icon-send"></i> Enviar Solicitud
         </button>
-        <button type="button" (click)="onCancel(solicitudForm)" class="btn-secundario">
-          Cancelar
+        <button type="button" (click)="onCancel(newSolicitudForm)" class="btn-secundario">
+          <i class="icon-cancel"></i> Cancelar
         </button>
       </div>
     </form>
   </div>
 
-  <!-- Botón para recargar -->
-  <button class="btn btn-primario mb-3" (click)="cargarSolicitudes()" [disabled]="loading">
-    Recargar Lista
-  </button>
-
-  <!-- Tabla de solicitudes de beca -->
+  <!-- Tabla de solicitudes -->
   <table class="tabla" *ngIf="!loading && filteredSolicitudes.length > 0">
     <thead>
       <tr>
         <th>ID</th>
         <th>Estudiante</th>
-        <th>Tipo Beca</th>
+        <th>Tipo de Beca</th>
         <th>Estado</th>
-        <th>Fecha Solicitud</th>
         <th>Período</th>
-        <th>Observaciones</th>
-        <th>Fecha Resultado</th>
+        <th>Fecha Solicitud</th>
         <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let solicitud of filteredSolicitudes">
         <td>{{ solicitud.id }}</td>
-        <td>{{ (solicitud.estudiante?.nombre + ' ' + solicitud.estudiante?.apellido) || 'N/A' }}</td>
-        <td>{{ solicitud.tipoBeca?.nombre || 'N/A' }}</td>
-        <td>{{ solicitud.estado?.nombre || 'N/A' }}</td>
-        <td>{{ solicitud.fechaSolicitud | date:'dd/MM/yyyy' }}</td>
-        <td>{{ solicitud.periodoAcademico?.nombre || 'N/A' }}</td>
-        <td>{{ solicitud.observaciones || 'N/A' }}</td>
-        <td>{{ solicitud.fechaResultado ? (solicitud.fechaResultado | date:'dd/MM/yyyy') : 'N/A' }}</td>
+        <td>{{ solicitud.estudiante?.nombre }} {{ solicitud.estudiante?.apellido }}</td>
+        <td>{{ getTipoBecaNombre(solicitud.tipoBecaId) }}</td>
+        <td>{{ getEstadoNombre(solicitud.estadoId) }}</td>
+        <td>{{ getPeriodoNombre(solicitud.periodoAcademicoId) }}</td>
+        <td>{{ solicitud.fechaSolicitud | date:'shortDate' }}</td>
         <td>
-          <button (click)="deleteSolicitud(solicitud.id)" class="btn-danger btn-sm">
-            Eliminar
+          <button (click)="deleteSolicitud(solicitud.id)" class="btn-danger">
+            <i class="icon-delete"></i> Eliminar
           </button>
         </td>
       </tr>
@@ -110,11 +97,47 @@
 
   <!-- Mensaje si no hay solicitudes -->
   <p *ngIf="filteredSolicitudes.length === 0 && !loading && !error" class="texto-centro">
-    No hay solicitudes de beca que coincidan con la búsqueda.
+    No hay solicitudes que coincidan con la búsqueda.
   </p>
 
-  <!-- Mensaje si no hay solicitudes en la base de datos -->
-  <p *ngIf="solicitudes.length === 0 && !loading && !error" class="texto-centro">
-    No hay solicitudes de beca registradas en el sistema.
-  </p>
+  <!-- Modal para crear nuevo tipo de beca -->
+  <div *ngIf="showCreateTipoBecaModal" class="modal-overlay" (click)="closeCreateTipoBecaModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Añadir Nuevo Tipo de Beca</h2>
+        <button class="modal-close" (click)="closeCreateTipoBecaModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="onSubmitNewTipoBeca()" #tipoBecaForm="ngForm">
+          <div class="form-group">
+            <label for="nuevoTipoNombre">Nombre:</label>
+            <input type="text" id="nuevoTipoNombre" name="nuevoTipoNombre" [(ngModel)]="newTipoBeca.nombre"
+              placeholder="Nombre del tipo de beca" required />
+          </div>
+
+          <div class="form-group">
+            <label for="nuevoTipoDescripcion">Descripción:</label>
+            <textarea id="nuevoTipoDescripcion" name="nuevoTipoDescripcion" [(ngModel)]="newTipoBeca.descripcion"
+              placeholder="Descripción del tipo de beca" required class="form-textarea"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="nuevoTipoMonto">Monto:</label>
+            <input type="number" id="nuevoTipoMonto" name="nuevoTipoMonto" [(ngModel)]="newTipoBeca.monto" 
+              placeholder="Monto de la beca" required min="0" step="0.01" />
+          </div>
+
+          <div class="form-group">
+            <label for="nuevoTipoEstadoId">ID Estado:</label>
+            <input type="number" id="nuevoTipoEstadoId" name="nuevoTipoEstadoId" [(ngModel)]="newTipoBeca.estadoId"
+              placeholder="ID del estado" required min="1" />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeCreateTipoBecaModal()">Cancelar</button>
+        <button class="btn-save" (click)="onSubmitNewTipoBeca()">Guardar Tipo de Beca</button>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,13 +1,26 @@
+// src/app/solicitud-beca/solicitud-beca.component.ts
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CommonModule, DatePipe, NgIf, NgFor } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 
-interface Estudiante { nombre: string; apellido: string; }
-interface TipoBeca { nombre: string; id: number; }
-interface Estado { nombre: string; id: number; }
-interface PeriodoAcademico { nombre: string; id: number; }
+interface Estudiante { 
+  nombre: string; 
+  apellido: string; 
+}
+interface TipoBeca { 
+  nombre: string; 
+  id: number; 
+}
+interface Estado { 
+  nombre: string; 
+  id: number; 
+}
+interface PeriodoAcademico { 
+  nombre: string; 
+  id: number; 
+}
 interface SolicitudBeca {
   id: number;
   estudianteId: number;
@@ -30,6 +43,14 @@ interface CreateSolicitudBecaDto {
   periodoAcademicoId: number;
   observaciones?: string | null;
   fechaResultado?: string | null;
+}
+
+// DTO para crear tipo de beca
+interface CreateTipoBecaDto {
+  nombre: string;
+  descripcion: string;
+  monto: number;
+  estadoId: number;
 }
 
 @Component({
@@ -59,6 +80,15 @@ export class SolicitudBecaComponent implements OnInit {
     periodoAcademicoId: 0,
     observaciones: null,
     fechaResultado: null
+  };
+
+  // Modal para crear nuevo tipo de beca
+  showCreateTipoBecaModal: boolean = false;
+  newTipoBeca: CreateTipoBecaDto = {
+    nombre: '',
+    descripcion: '',
+    monto: 0,
+    estadoId: 1
   };
 
   private baseUrl = 'http://localhost:3000/api-beca';
@@ -101,21 +131,48 @@ export class SolicitudBecaComponent implements OnInit {
   private cargarTiposBeca() {
     return new Promise<void>((resolve) => {
       this.http.get<TipoBeca[]>(`${this.baseUrl}/tipo-beca`, { headers: this.getHeaders() })
-        .subscribe({ next: data => { this.tiposBeca = data; }, error: err => console.error(err), complete: () => resolve() });
+        .subscribe({ 
+          next: data => { 
+            this.tiposBeca = data; 
+            resolve(); 
+          }, 
+          error: err => { 
+            console.error(err); 
+            resolve(); 
+          } 
+        });
     });
   }
 
   private cargarPeriodosAcademicos() {
     return new Promise<void>((resolve) => {
       this.http.get<PeriodoAcademico[]>(`${this.baseUrl}/periodo-academico`, { headers: this.getHeaders() })
-        .subscribe({ next: data => { this.periodosAcademicos = data; }, error: err => console.error(err), complete: () => resolve() });
+        .subscribe({ 
+          next: data => { 
+            this.periodosAcademicos = data; 
+            resolve(); 
+          }, 
+          error: err => { 
+            console.error(err); 
+            resolve(); 
+          } 
+        });
     });
   }
 
   private cargarEstados() {
     return new Promise<void>((resolve) => {
-      this.http.get<Estado[]>(`${this.baseUrl}/Estado`, { headers: this.getHeaders() })
-        .subscribe({ next: data => { this.estados = data; }, error: err => console.error(err), complete: () => resolve() });
+      this.http.get<Estado[]>(`${this.baseUrl}/estado`, { headers: this.getHeaders() })
+        .subscribe({ 
+          next: data => { 
+            this.estados = data; 
+            resolve(); 
+          }, 
+          error: err => { 
+            console.error(err); 
+            resolve(); 
+          } 
+        });
     });
   }
 
@@ -141,8 +198,14 @@ export class SolicitudBecaComponent implements OnInit {
     this.loading = true;
     this.http.get<SolicitudBeca[]>(`${this.baseUrl}/solicitudes-beca/pendientes`, { headers: this.getHeaders() })
       .subscribe({
-        next: data => { this.solicitudesPendientes = data || []; this.loading = false; },
-        error: err => { console.error('Error cargando pendientes:', err); this.loading = false; }
+        next: data => { 
+          this.solicitudesPendientes = data || []; 
+          this.loading = false; 
+        },
+        error: err => { 
+          console.error('Error cargando pendientes:', err); 
+          this.loading = false; 
+        }
       });
   }
 
@@ -211,8 +274,15 @@ export class SolicitudBecaComponent implements OnInit {
     this.loading = true;
     this.http.delete(`${this.baseUrl}/solicitudes-beca/${id}`, { headers: this.getHeaders() })
       .subscribe({ 
-        next: () => { this.cargarSolicitudes(); this.cargarPendientes(); this.loading = false; },
-        error: err => { this.error = 'Error al eliminar solicitud'; this.loading = false; } 
+        next: () => { 
+          this.cargarSolicitudes(); 
+          this.cargarPendientes(); 
+          this.loading = false; 
+        },
+        error: err => { 
+          this.error = 'Error al eliminar solicitud'; 
+          this.loading = false; 
+        } 
       });
   }
 
@@ -226,4 +296,64 @@ export class SolicitudBecaComponent implements OnInit {
   getTipoBecaNombre(id: number): string { return this.tiposBeca.find(t => t.id === id)?.nombre || 'Desconocido'; }
   getPeriodoNombre(id: number): string { return this.periodosAcademicos.find(p => p.id === id)?.nombre || 'Desconocido'; }
   getEstadoNombre(id: number): string { return this.estados.find(e => e.id === id)?.nombre || 'Desconocido'; }
+
+  // Métodos para el modal de crear tipo de beca
+  openCreateTipoBecaModal() {
+    this.showCreateTipoBecaModal = true;
+    this.newTipoBeca = {
+      nombre: '',
+      descripcion: '',
+      monto: 0,
+      estadoId: 1
+    };
+  }
+
+  closeCreateTipoBecaModal() {
+    this.showCreateTipoBecaModal = false;
+  }
+
+  onSubmitNewTipoBeca() {
+    // Validaciones
+    if (!this.newTipoBeca.nombre.trim()) {
+      this.error = 'El nombre es requerido';
+      return;
+    }
+    if (!this.newTipoBeca.descripcion.trim()) {
+      this.error = 'La descripción es requerida';
+      return;
+    }
+    if (this.newTipoBeca.monto === null || this.newTipoBeca.monto === undefined || this.newTipoBeca.monto < 0) {
+      this.error = 'El monto debe ser un número mayor o igual a 0';
+      return;
+    }
+    if (this.newTipoBeca.estadoId === null || this.newTipoBeca.estadoId === undefined || this.newTipoBeca.estadoId < 1) {
+      this.error = 'El ID del estado es requerido y debe ser mayor a 0';
+      return;
+    }
+
+    this.loading = true;
+    const payload = {
+      nombre: this.newTipoBeca.nombre.trim(),
+      descripcion: this.newTipoBeca.descripcion.trim(),
+      monto: this.newTipoBeca.monto,
+      estadoId: this.newTipoBeca.estadoId
+    };
+
+    this.http.post<TipoBeca>(`${this.baseUrl}/tipo-beca`, payload, { headers: this.getHeaders() })
+      .subscribe({
+        next: (response) => {
+          this.loading = false;
+          this.closeCreateTipoBecaModal();
+          // Refrescar la lista de tipos de beca
+          this.cargarTiposBeca().then(() => {
+            alert('Tipo de beca creado correctamente');
+          });
+        },
+        error: (err) => {
+          this.error = 'Error al crear tipo de beca: ' + (err.error?.message || err.message);
+          this.loading = false;
+          console.error(err);
+        }
+      });
+  }
 }

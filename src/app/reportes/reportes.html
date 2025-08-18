@@ -1,0 +1,264 @@
+<!-- src/app/reportes/reportes.html -->
+<div class="report-container">
+  <!-- Encabezado -->
+  <header class="report-header">
+    <div class="logo-section">
+      <img src="assets/logo.png" alt="Logo Universidad" class="logo-img">
+      <h1>Centro de Reportes</h1>
+      <p>Análisis completo del programa de becas estudiantiles</p>
+    </div>
+    <div class="controls">
+      <select class="year-select">
+        <option value="2024">2024</option>
+        <option value="2023">2023</option>
+        <option value="2022">2022</option>
+      </select>
+      <button class="export-btn" (click)="exportReport()">
+        <i class="icon-download"></i> Exportar
+      </button>
+    </div>
+  </header>
+
+  <!-- Métricas principales -->
+  <div class="metrics-container">
+    <div class="metric-card green">
+      <div class="icon"><i class="icon-user"></i></div>
+      <div class="value">{{ stats.totalBeneficiarios }}</div>
+      <div class="label">Total Beneficiarios</div>
+    </div>
+    <div class="metric-card blue">
+      <div class="icon"><i class="icon-dollar"></i></div>
+      <div class="value">C${{ stats.presupuestoTotal | number:'1.0-0'}}.00</div>
+      <div class="label">Presupuesto Total</div>
+    </div>
+    <div class="metric-card red">
+      <div class="icon"><i class="icon-document"></i></div>
+      <div class="value">{{ stats.solicitudesEstePeriodo }}</div>
+      <div class="label">Solicitudes</div>
+    </div>
+    <div class="metric-card purple">
+      <div class="icon"><i class="icon-target"></i></div>
+      <div class="value">{{ stats.tasaAprobacion }}%</div>
+      <div class="label">Tasa de Aprobación</div>
+    </div>
+  </div>
+
+  <!-- Navegación entre pestañas -->
+  <div class="tabs-container">
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'resumen'"
+      (click)="changeTab('resumen')"
+    >
+      <i class="icon-list"></i> Resumen
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'financiero'"
+      (click)="changeTab('financiero')"
+    >
+      <i class="icon-money"></i> Financiero
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'impacto'"
+      (click)="changeTab('impacto')"
+    >
+      <i class="icon-chart"></i> Impacto
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'estudiante'"
+      (click)="changeTab('estudiante')"
+    >
+      <i class="icon-user"></i> Por Estudiante
+    </button>
+  </div>
+
+  <!-- Contenido según pestaña activa -->
+  <div class="content-area">
+    <!-- Resumen -->
+    <div *ngIf="activeTab === 'resumen'" class="section">
+      <div class="chart-wrapper">
+        <div class="chart-container">
+          <div class="chart-header">
+            <h2>Ejecución Presupuestaria</h2>
+            <p>Comparativa mensual de presupuesto vs ejecución</p>
+          </div>
+          <div class="chart-content">
+            <div class="chart">
+              <!-- Gráfico de barras -->
+              <div class="bar-chart">
+                <div class="bar" *ngFor="let item of financialData" [style.height]="item.ejecutado / 50000 * 100 + '%'">
+                  <div class="bar-label">{{ item.mes }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="chart-wrapper">
+        <div class="chart-container">
+          <div class="chart-header">
+            <h2>Tendencia de Gastos</h2>
+            <p>Evolución mensual del gasto ejecutado</p>
+          </div>
+          <div class="chart-content">
+            <div class="chart">
+              <!-- Gráfico de línea mejorado -->
+              <div class="line-chart-container">
+                <div class="line-chart">
+                  <div class="line-path" [style.background]="'linear-gradient(to right, #3498db 0%, #3498db ' + getLinePercentage() + '%, #ddd ' + getLinePercentage() + '%, #ddd 100%)'"></div>
+                  <div class="line-points">
+                    <div class="point" *ngFor="let item of financialData; let i = index" 
+                         [style.left.%]="getPointPosition(i)" 
+                         [style.bottom.%]="getPointBottomPosition(item.ejecutado)">
+                      <div class="point-circle"></div>
+                      <div class="point-label">{{ item.ejecutado | number:'1.0-0' }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Financiero -->
+    <div *ngIf="activeTab === 'financiero'" class="section">
+      <div class="chart-container">
+        <h2>Distribución por Tipo de Beca</h2>
+        <div class="chart">
+          <!-- Aquí iría el gráfico de pastel -->
+          <div class="pie-chart">
+            <div class="pie-slice" *ngFor="let item of impactData; let i = index" 
+                 [style.transform]="'rotate(' + (i * 72) + 'deg)'">
+              <div class="slice-label">{{ item.carrera }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Impacto -->
+    <div *ngIf="activeTab === 'impacto'" class="section">
+      <div class="table-container">
+        <h2>Impacto por Carrera</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Carrera</th>
+              <th>Beneficiarios</th>
+              <th>Promedio</th>
+              <th>Graduados</th>
+              <th>Retención</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of impactData">
+              <td>{{ item.carrera }}</td>
+              <td>{{ item.beneficiarios }}</td>
+              <td>{{ item.promedio }}</td>
+              <td>{{ item.graduados }}</td>
+              <td>{{ item.tasaRetencion }}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Por Estudiante -->
+    <div *ngIf="activeTab === 'estudiante'" class="section">
+      <div class="search-bar">
+        <input type="text" placeholder="Buscar estudiante..." [(ngModel)]="searchTerm" (input)="onSearch()" />
+        <button><i class="icon-search"></i></button>
+      </div>
+      
+      <div class="student-cards-container">
+        <div class="student-card" *ngFor="let student of filteredStudents">
+          <div class="student-card-header">
+            <div class="student-avatar">
+              {{ student.nombre.charAt(0) }}{{ student.apellidos.charAt(0) }}
+            </div>
+            <div class="student-name">
+              <h3>{{ student.nombre }} {{ student.apellidos }}</h3>
+              <p>{{ student.carrera }}</p>
+            </div>
+          </div>
+          <div class="student-card-body">
+            <div class="student-stats">
+              <div class="stat-item">
+                <span class="label">Becas</span>
+                <span class="value">{{ student.becas }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="label">Monto Total</span>
+                <span class="value">C${{ student.montoTotal | number:'1.0-0' }}</span>
+              </div>
+            </div>
+            <div class="student-actions">
+              <button class="btn-view" (click)="openStudentModal(student)">Ver Detalles</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal de detalles del estudiante -->
+  <div *ngIf="selectedStudent" class="modal-overlay" (click)="closeStudentModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Detalles del Estudiante</h2>
+        <button class="modal-close" (click)="closeStudentModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="student-detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Nombre:</span>
+            <span class="detail-value">{{ selectedStudent.nombre }} {{ selectedStudent.apellidos }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Carrera:</span>
+            <span class="detail-value">{{ selectedStudent.carrera }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Becas:</span>
+            <span class="detail-value">{{ selectedStudent.becas }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Monto Total:</span>
+            <span class="detail-value">C${{ selectedStudent.montoTotal | number:'1.0-0' }}</span>
+          </div>
+          <div class="detail-item full-width">
+            <span class="detail-label">Historial de Becas:</span>
+            <div class="beka-history">
+              <div class="beka-item" *ngFor="let beca of studentBecas">
+                <div class="beka-details">
+                  <span class="beka-name">{{ beca.nombre }}</span>
+                  <span class="beka-amount">C${{ beca.monto | number:'1.0-0' }}</span>
+                </div>
+                <div class="beka-date">{{ beca.fecha }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeStudentModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Mensaje de error -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+  
+  <!-- Loader -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+</div>

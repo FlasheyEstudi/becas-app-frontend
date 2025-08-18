@@ -59,6 +59,7 @@ export class SidebarComponent implements OnInit {
       { label: 'Períodos', icon: '📅', route: '/periodo-academico', visible: this.userRole === 'admin' },
       { label: 'Solicitudes', icon: '📝', route: '/solicitud-beca', visible: this.userRole === 'admin' },
       { label: 'Estados', icon: '🔄', route: '/estado', visible: this.userRole === 'admin' },
+      { label: 'Reportes', icon: '📈', route: '/reportes', visible: this.userRole === 'admin' }, // Nueva línea
       { label: 'Configuración', icon: '⚙️', route: '/configuracion', visible: this.userRole === 'admin' },
 
       // Menú Estudiante
